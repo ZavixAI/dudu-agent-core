@@ -121,27 +121,28 @@ def load_config(env: str) -> SyncConfig:
     )
 
 
-def mcp_tool_names(mcp_file: Path) -> list[str]:
-    if not mcp_file.exists():
-        raise RuntimeError(f"MCP file does not exist: {mcp_file}")
+def mcp_tool_names(mcp_tools_dir: Path) -> list[str]:
+    if not mcp_tools_dir.exists():
+        raise RuntimeError(f"MCP tools dir does not exist: {mcp_tools_dir}")
 
-    tree = ast.parse(mcp_file.read_text(encoding="utf-8"), filename=str(mcp_file))
     names: list[str] = []
     seen: set[str] = set()
 
-    for node in ast.walk(tree):
-        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            continue
-        for decorator in node.decorator_list:
-            if not is_mcp_tool_decorator(decorator):
+    for path in sorted(mcp_tools_dir.rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
-            tool_name = mcp_tool_name_from_decorator(decorator) or node.name
-            if tool_name not in seen:
-                names.append(tool_name)
-                seen.add(tool_name)
+            for decorator in node.decorator_list:
+                if not is_mcp_tool_decorator(decorator):
+                    continue
+                tool_name = mcp_tool_name_from_decorator(decorator) or node.name
+                if tool_name not in seen:
+                    names.append(tool_name)
+                    seen.add(tool_name)
 
     if not names:
-        raise RuntimeError(f"No @mcp.tool registrations found in {mcp_file}")
+        raise RuntimeError(f"No MCP tool registrations found in {mcp_tools_dir}")
     return names
 
 
@@ -151,7 +152,6 @@ def is_mcp_tool_decorator(decorator: ast.expr) -> bool:
         isinstance(target, ast.Attribute)
         and target.attr == "tool"
         and isinstance(target.value, ast.Name)
-        and target.value.id == "mcp"
     )
 
 
@@ -357,15 +357,15 @@ def run_sync(
     *,
     skills_dir: Path,
     prompts_dir: Path,
-    mcp_file: Path,
+    mcp_tools_dir: Path,
     dry_run: bool,
 ) -> None:
     skills_dir = skills_dir.resolve()
     prompts_dir = prompts_dir.resolve()
-    mcp_file = mcp_file.resolve()
+    mcp_tools_dir = mcp_tools_dir.resolve()
     directories = skill_dirs(skills_dir)
     skill_names = [directory.name for directory in directories]
-    tool_names = mcp_tool_names(mcp_file)
+    tool_names = mcp_tool_names(mcp_tools_dir)
     system_prompt_path = prompt_path(prompts_dir, config.agent_name)
     system_prompt = system_prompt_path.read_text(encoding="utf-8")
 
@@ -378,7 +378,7 @@ def run_sync(
         for skill_name in skill_names:
             print(f"- {skill_name}")
         print(f"Prompt: {system_prompt_path}")
-        print(f"MCP file: {mcp_file}")
+        print(f"MCP tools dir: {mcp_tools_dir}")
         print("Available tools: " + ", ".join(tool_names))
         print("Dry run only; no requests were sent.")
         return
@@ -407,7 +407,7 @@ def main() -> None:
     parser.add_argument("--env-file", default=str(DEFAULT_ENV_FILE))
     parser.add_argument("--skills-dir", default=str(REPO_ROOT / "skills"))
     parser.add_argument("--prompts-dir", default=str(REPO_ROOT / "prompts"))
-    parser.add_argument("--mcp-file", default=str(REPO_ROOT / "app/api/mcp.py"))
+    parser.add_argument("--mcp-tools-dir", default=str(REPO_ROOT / "app/api/mcp_tools"))
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
 
@@ -417,7 +417,7 @@ def main() -> None:
         config,
         skills_dir=Path(args.skills_dir),
         prompts_dir=Path(args.prompts_dir),
-        mcp_file=Path(args.mcp_file),
+        mcp_tools_dir=Path(args.mcp_tools_dir),
         dry_run=args.dry_run,
     )
 
