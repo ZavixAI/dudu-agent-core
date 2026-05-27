@@ -11,6 +11,7 @@ mcp_http = mcp.http_app("/mcp")
 
 __all__ = [
     "echo",
+    "hello_world",
     "mcp",
     "mcp_http",
 ]
@@ -24,4 +25,15 @@ async def echo(message: str) -> dict[str, Any]:
     """Return the input message for MCP integration smoke tests."""
     return {
         "message": message,
+    }
+
+
+@mcp.tool(
+    name="hello_world",
+    description="Demo tool that returns a hello world message.",
+)
+async def hello_world() -> dict[str, str]:
+    """Return a static message for MCP build and smoke tests."""
+    return {
+        "message": "Hello, world!",
     }
