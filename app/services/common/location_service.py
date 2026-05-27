@@ -88,8 +88,8 @@ async def search_location(
     )
 
     return {
-        # "items": [location.model_dump() for location in result.locations],
-        "formatted_text": result.to_display_text(),
+        "items": [location.model_dump() for location in result.locations],
+        # "formatted_text": result.to_display_text(),
     }
 
 
