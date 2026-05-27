@@ -6,6 +6,7 @@ from contextlib import AbstractAsyncContextManager, asynccontextmanager
 from typing import AsyncIterator, Callable
 
 from config.settings import init_app_config
+from core.infra.http_client import close_http_clients, init_http_clients
 from fastapi import FastAPI
 from loguru import logger
 
@@ -24,6 +25,7 @@ def build_app_lifespan(
             logger.info("Application startup started.")
             startup_cfg = init_app_config()
             app_instance.state.startup_config = startup_cfg
+            await init_http_clients(startup_cfg)
             logger.info("Application startup finished.")
         except Exception as exc:
             logger.exception("Application startup failed.")
@@ -37,6 +39,7 @@ def build_app_lifespan(
                 async with nested_lifespan(app_instance):
                     yield
         finally:
+            await close_http_clients()
             logger.info("Application shutdown finished.")
 
     return lifespan

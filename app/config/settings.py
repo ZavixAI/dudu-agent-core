@@ -35,6 +35,7 @@ class AppConfig:
     logs_dir: str = "./logs"
     log_level: str = "DEBUG"
     cors_origins: tuple[str, ...] = ("*",)
+    rideclaw_base_url: str = "https://rideclaw.dudubashi.com"
     mysql_host: str = "127.0.0.1"
     mysql_port: int = 3306
     mysql_user: str = "root"
@@ -52,6 +53,11 @@ def build_app_config(**overrides: Any) -> AppConfig:
     config = AppConfig(
         port=env_int("DUDU_PORT", AppConfig.port),
         log_level=env_str("DUDU_LOG_LEVEL", AppConfig.log_level) or AppConfig.log_level,
+        rideclaw_base_url=env_str(
+            "DUDU_RIDECLAW_BASE_URL",
+            AppConfig.rideclaw_base_url,
+        )
+        or AppConfig.rideclaw_base_url,
         mysql_host=env_str("DUDU_MYSQL_HOST", AppConfig.mysql_host)
         or AppConfig.mysql_host,
         mysql_port=env_int("DUDU_MYSQL_PORT", AppConfig.mysql_port),
