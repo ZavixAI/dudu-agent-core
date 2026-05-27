@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+loguru
+python-dotenv
+fastmcp~=2.12.5
+SQLAlchemy
+aiomysql
+greenlet
