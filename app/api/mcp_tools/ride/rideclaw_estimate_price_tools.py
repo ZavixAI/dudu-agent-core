@@ -12,7 +12,7 @@ def register_rideclaw_estimate_price_tools(mcp_app) -> None:
     """注册 RideClaw 打车价格预估 MCP 工具。"""
 
     @mcp_app.tool(
-        name="rideclaw_estimate_price",
+        name="estimate_price",
         description="根据出发地和目的地预估打车报价。",
     )
     async def rideclaw_estimate_price(

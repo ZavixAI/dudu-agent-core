@@ -58,7 +58,7 @@ def _get_search_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
     module.register_rideclaw_search_location_tools(mcp_app)
-    return mcp_app.tools["rideclaw_search_location"]["func"]
+    return mcp_app.tools["search_location"]["func"]
 
 
 def test_search_location_tool_returns_unified_response(monkeypatch) -> None:
