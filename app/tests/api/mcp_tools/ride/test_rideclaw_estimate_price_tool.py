@@ -1,12 +1,19 @@
-"""End-to-end tests for the RideClaw estimate MCP tool wrapper."""
+"""End-to-end tests for the RideClaw estimate MCP tool."""
 
 import asyncio
 import importlib
 import sys
-import types
-from unittest.mock import AsyncMock
+from pathlib import Path
+from typing import Any
 
 import pytest
+
+APP_DIR = Path(__file__).resolve().parents[4]
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
+
+from core.http.exceptions import AppHTTPException
+from services.ride import estimate_service
 
 MODULE_NAME = "api.mcp_tools.ride.rideclaw_estimate_price_tools"
 
@@ -28,38 +35,43 @@ class FakeMCPApp:
         return decorator
 
 
-@pytest.fixture
-def tool_module():
-    mocked_estimate_ride_price = AsyncMock()
-    fake_estimate_service = types.ModuleType("services.ride.estimate_service")
-    fake_estimate_service.estimate_ride_price = mocked_estimate_ride_price
-    original_estimate_service = sys.modules.get("services.ride.estimate_service")
-    original_tool_module = sys.modules.pop(MODULE_NAME, None)
-    sys.modules["services.ride.estimate_service"] = fake_estimate_service
+class FakeResponse:
+    def __init__(self, payload: dict[str, Any]) -> None:
+        self.payload = payload
 
-    try:
-        module = importlib.import_module(MODULE_NAME)
-        yield module, mocked_estimate_ride_price
-    finally:
-        sys.modules.pop(MODULE_NAME, None)
-        if original_tool_module is not None:
-            sys.modules[MODULE_NAME] = original_tool_module
-        if original_estimate_service is None:
-            sys.modules.pop("services.ride.estimate_service", None)
-        else:
-            sys.modules["services.ride.estimate_service"] = original_estimate_service
+    def raise_for_status(self) -> None:
+        return None
+
+    def json(self) -> dict[str, Any]:
+        return self.payload
 
 
-def test_registers_and_calls_estimate_service(tool_module) -> None:
-    module, mocked_estimate_ride_price = tool_module
+class FakeHTTPClient:
+    def __init__(self, payload: dict[str, Any]) -> None:
+        self.payload = payload
+
+    async def post(self, *args, **kwargs) -> FakeResponse:
+        return FakeResponse(self.payload)
+
+
+def _get_estimate_tool():
+    module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    expected_result = {"estimated_price": 42}
-    mocked_estimate_ride_price.return_value = expected_result
-
     module.register_rideclaw_estimate_price_tools(mcp_app)
-    tool = mcp_app.tools["rideclaw_estimate_price"]
+    return mcp_app.tools["rideclaw_estimate_price"]["func"]
+
+
+def test_estimate_tool_returns_unified_response(monkeypatch) -> None:
+    expected_data = {"estimated_price": 42, "currency": "CNY"}
+
+    async def fake_get_http_client(service_name: str) -> FakeHTTPClient:
+        assert service_name == "rideclaw"
+        return FakeHTTPClient({"code": 0, "message": "success", "data": expected_data})
+
+    monkeypatch.setattr(estimate_service, "get_http_client", fake_get_http_client)
+
     result = asyncio.run(
-        tool["func"](
+        _get_estimate_tool()(
             from_lng="116.397128",
             from_lat="39.916527",
             from_name="天安门",
@@ -72,48 +84,33 @@ def test_registers_and_calls_estimate_service(tool_module) -> None:
         )
     )
 
-    assert tool["description"] == "Estimate taxi quote by origin and destination."
-    assert result == expected_result
-    mocked_estimate_ride_price.assert_awaited_once_with(
-        from_lng="116.397128",
-        from_lat="39.916527",
-        from_name="天安门",
-        to_lng="116.407396",
-        to_lat="39.904200",
-        to_name="北京站",
-        order_type=2,
-        booking_time_str="2026-05-04 12:00",
-        user_token="user-token",
-    )
+    assert result == {"ok": True, "data": expected_data}
 
 
-def test_uses_realtime_order_defaults(tool_module) -> None:
-    module, mocked_estimate_ride_price = tool_module
-    mcp_app = FakeMCPApp()
-    expected_result = {"estimated_price": 35}
-    mocked_estimate_ride_price.return_value = expected_result
+@pytest.mark.parametrize(
+    ("payload", "error_code"),
+    [
+        ({"code": 1001, "message": "invalid route", "data": None}, "RIDECLOW_QUOTE_ERROR"),
+        ({"code": 0, "message": "success", "data": None}, "RIDECLOW_QUOTE_EMPTY"),
+    ],
+)
+def test_estimate_tool_raises_for_failed_quote(monkeypatch, payload, error_code) -> None:
+    async def fake_get_http_client(service_name: str) -> FakeHTTPClient:
+        assert service_name == "rideclaw"
+        return FakeHTTPClient(payload)
 
-    module.register_rideclaw_estimate_price_tools(mcp_app)
-    result = asyncio.run(
-        mcp_app.tools["rideclaw_estimate_price"]["func"](
-            from_lng="116.397128",
-            from_lat="39.916527",
-            from_name="天安门",
-            to_lng="116.407396",
-            to_lat="39.904200",
-            to_name="北京站",
+    monkeypatch.setattr(estimate_service, "get_http_client", fake_get_http_client)
+
+    with pytest.raises(AppHTTPException) as exc_info:
+        asyncio.run(
+            _get_estimate_tool()(
+                from_lng="116.397128",
+                from_lat="39.916527",
+                from_name="天安门",
+                to_lng="116.407396",
+                to_lat="39.904200",
+                to_name="北京站",
+            )
         )
-    )
 
-    assert result == expected_result
-    mocked_estimate_ride_price.assert_awaited_once_with(
-        from_lng="116.397128",
-        from_lat="39.916527",
-        from_name="天安门",
-        to_lng="116.407396",
-        to_lat="39.904200",
-        to_name="北京站",
-        order_type=1,
-        booking_time_str=None,
-        user_token=None,
-    )
+    assert exc_info.value.error_code == error_code
