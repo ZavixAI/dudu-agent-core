@@ -1,1 +1,0 @@
-"""Hotel room MCP tools."""

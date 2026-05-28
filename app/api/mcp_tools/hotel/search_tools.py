@@ -1,1 +1,0 @@
-"""Hotel search MCP tools."""
