@@ -16,19 +16,19 @@
 
 路径：`skills/taxi-booking/SKILL.md`
 
-负责同城打车、地点验证、价格预估、车型确认和支付订单生成。
+负责同城打车、地点验证、价格预估、车型确认和待支付打车订单数据生成。
 
 ### hotel-booking
 
 路径：`skills/hotel-booking/SKILL.md`
 
-负责酒店查询、房型筛选、房型确认和酒店订单创建。
+负责酒店查询、房型筛选、房型确认和待支付酒店订单数据生成。
 
 ### transport-booking
 
 路径：`skills/transport-booking/SKILL.md`
 
-负责跨城交通方案搜索、方案确认和交通订单创建。
+负责跨城交通方案搜索、方案确认和待支付交通订单数据生成。
 
 ### travel-planning
 

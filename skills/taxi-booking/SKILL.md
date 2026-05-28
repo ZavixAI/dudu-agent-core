@@ -1,11 +1,11 @@
 ---
 name: taxi-booking
-description: 当用户需要同城打车、查询地点经纬度、获取车辆报价、选择车型下单或完成支付订单时，使用本技能。
+description: 当用户需要同城打车、查询地点经纬度、获取车辆报价、选择车型并生成待支付打车订单数据时，使用本技能。
 
 ---
 ## 适用范围
 
-当用户需要同城打车、查询地点经纬度、获取车辆报价、选择车型下单或完成支付订单时，使用本技能。
+当用户需要同城打车、查询地点经纬度、获取车辆报价、选择车型并生成待支付打车订单数据时，使用本技能。
 
 ## 能力边界
 
@@ -17,10 +17,10 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 ## 基础流程
 
 1. 用户提出打车需求后，先补齐上车点和目的地。
-2. 分别调用 `rideclaw_search_location` 查询上车点和目的地经纬度。
-3. 调用 `rideclaw_estimate_price` 获取车辆报价。
-4. 用户选择车型后，调用 `create_taxi_order` 生成支付订单。
-5. `create_taxi_order` 成功后任务结束。
+2. 分别调用 `search_location` 查询上车点和目的地经纬度。
+3. 调用 `estimate_price` 获取车辆报价。
+4. 用户选择车型后，调用 `create_pending_payment_taxi_order` 生成待支付打车订单数据。
+5. `create_pending_payment_taxi_order` 成功后任务结束。
 
 ## 与其他技能的边界
 
@@ -28,7 +28,7 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 - 用户主要目标是跨城出行时，交给 `transport-booking`；不要把跨城起终点按同城打车处理。
 - 用户同时提出跨城交通、酒店和到站后打车等组合需求时，交给 `travel-planning` 拆解整体流程。
 - 只有整体规划或跨城出行已经产生明确到达站点/酒店地址，并需要“站点到酒店”等同城接驳时，才回到本技能处理打车。
-- 接收其他技能传入的打车任务时，只处理本段上车点、目的地、估价、车型选择和支付订单，不重新规划酒店或跨城交通。
+- 接收其他技能传入的打车任务时，只处理本段上车点、目的地、估价、车型选择和待支付打车订单数据，不重新规划酒店或跨城交通。
 
 ## 信息要求
 
@@ -51,7 +51,7 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 ## 估价与车型
 
 - 估价前必须确认上车点和目的地都已验证。
-- 调用 `rideclaw_estimate_price` 工具拿到车辆报价时，调用后用户可以看到工具执行的结果，仅输出“请选择您想要的车型”，不允许输出任何其他信息。
+- 调用 `estimate_price` 工具拿到车辆报价时，调用后用户可以看到工具执行的结果，仅输出“请选择您想要的车型”，不允许输出任何其他信息。
 - 估价后必须等待用户选择车型，除非用户在同一轮已经明确指定车型且上下车点已确认。
 - 报价过期、用户明确修改上下车点，或用户反馈价格后需要重新估价。
 
@@ -69,7 +69,9 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 
 如果用户选择车型时同时复述上车点和目的地，且地点与当前已验证地点语义一致，视为确认订单信息，直接进入下单。
 
-调用 `create_taxi_order` 工具生成支付订单，调用后用户可以看到结果，仅需输出“请完成支付”，禁止输出额外内容，`create_taxi_order` 成功后任务结束。
+调用 `create_pending_payment_taxi_order` 工具生成待支付订单，调用后用户可以看到结果，仅需输出“请完成支付”，禁止输出额外内容，`create_pending_payment_taxi_order` 成功后任务结束。
+
+`create_pending_payment_taxi_order` 需要使用 `estimate_price` 返回中的 `estimate_trace_id`、用户选择车型对应的 `standard_car_type`、`estimated_price`、`estimated_duration`、`estimated_distance`，以及当前上车点和目的地名称。不要编造这些字段；缺少时先让用户重新选择或重新估价。
 
 ## 修改需求
 
@@ -85,11 +87,11 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 - 信息缺失时，只问一个最关键的问题。
 - 工具结果已经展示给用户时，不重复输出工具明细。
 - 不能确认的状态不要说已经完成。
-- 调用 `rideclaw_estimate_price` 后，只能输出：请选择您想要的车型
-- 调用 `create_taxi_order` 成功后，只能输出：请完成支付
+- 调用 `estimate_price` 后，只能输出：请选择您想要的车型
+- 调用 `create_pending_payment_taxi_order` 成功后，只能输出：请完成支付
 
 ## 相关工具
 
-- rideclaw_search_location
-- rideclaw_estimate_price
-- create_taxi_order
+- search_location
+- estimate_price
+- create_pending_payment_taxi_order
