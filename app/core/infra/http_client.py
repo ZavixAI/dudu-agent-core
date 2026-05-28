@@ -9,7 +9,7 @@ from config.settings import AppConfig, get_app_config
 
 _HTTP_CLIENT_LOCK = asyncio.Lock()
 _HTTP_CLIENTS: dict[str, httpx.AsyncClient] = {}
-DEFAULT_HTTP_TIMEOUT_SECONDS = 10.0
+DEFAULT_HTTP_TIMEOUT_SECONDS = 30.0
 
 
 def _normalize_base_url(base_url: str) -> str:
