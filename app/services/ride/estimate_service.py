@@ -12,6 +12,8 @@ from loguru import logger
 from config import constants
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
+from schema.mcp import MCPToolResponse
+from schema.ride import RawRideEstimateResponse
 
 
 def _booking_time_to_millis(booking_time_str: str) -> int:
@@ -99,19 +101,33 @@ async def estimate_ride_price(
         ) from exc
 
     payload = response.json()
-    if payload.get("code") != 0:
+    raw_response = RawRideEstimateResponse(**payload)
+    if raw_response.code != 0:
         logger.warning(
             "RideClaw quote returned error from_name={} to_name={} order_type={} code={} message={}",
             from_name,
             to_name,
             order_type,
-            payload.get("code"),
-            payload.get("message"),
+            raw_response.code,
+            raw_response.message,
         )
         raise AppHTTPException(
             status_code=502,
             detail="RideClaw quote returned an error",
             error_code="RIDECLOW_QUOTE_ERROR",
+            error_detail=payload,
+        )
+    if raw_response.data is None:
+        logger.info(
+            "RideClaw quote returned no data from_name={} to_name={} order_type={}",
+            from_name,
+            to_name,
+            order_type,
+        )
+        raise AppHTTPException(
+            status_code=404,
+            detail="RideClaw quote returned no data",
+            error_code="RIDECLOW_QUOTE_EMPTY",
             error_detail=payload,
         )
 
@@ -121,7 +137,7 @@ async def estimate_ride_price(
         to_name,
         order_type,
     )
-    return payload.get("data")
+    return MCPToolResponse(data=raw_response.data).model_dump()
 
 
 __all__ = [

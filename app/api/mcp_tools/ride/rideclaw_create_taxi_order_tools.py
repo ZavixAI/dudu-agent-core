@@ -1,39 +1,60 @@
 """RideClaw create taxi order MCP tools."""
 
-from __future__ import annotations
+from typing import Annotated, Union
 
-from typing import Union
-from uuid import uuid4
+from pydantic import Field
 
 
 def register_rideclaw_create_taxi_order_tools(mcp_app) -> None:
-    """Register RideClaw create taxi order MCP tools."""
+    """注册 RideClaw 创建打车订单 MCP 工具。"""
 
     @mcp_app.tool(
         name="create_taxi_order",
-        description="Create a taxi order from the user's selected quote option.",
+        description="根据用户选择的报价方案创建打车订单。",
     )
     async def create_taxi_order(
-        estimate_trace_id: str,
-        standard_car_type: str,
-        estimated_price: Union[float, int, str],
-        estimated_duration: Union[int, str, float],
-        estimated_distance: Union[int, str, float],
-        from_name: str,
-        to_name: str,
+        estimate_trace_id: Annotated[
+            str,
+            Field(description="价格预估接口返回的追踪 ID，用于关联本次报价。"),
+        ],
+        standard_car_type: Annotated[
+            str,
+            Field(description="用户选择的标准车型。"),
+        ],
+        estimated_price: Annotated[
+            Union[float, int, str],
+            Field(description="用户选择方案的预估价格。"),
+        ],
+        estimated_duration: Annotated[
+            Union[int, str, float],
+            Field(description="用户选择方案的预估行程时长。"),
+        ],
+        estimated_distance: Annotated[
+            Union[int, str, float],
+            Field(description="用户选择方案的预估行程距离。"),
+        ],
+        from_name: Annotated[
+            str,
+            Field(description="出发地点名称。"),
+        ],
+        to_name: Annotated[
+            str,
+            Field(description="目的地点名称。"),
+        ],
     ) -> dict[str, object]:
-        """Create mocked taxi order information from the user's selected option."""
+        """根据用户选择的方案创建打车订单信息。"""
 
         return {
-            "order_id": f"mock_taxi_order_{uuid4().hex}",
-            "estimate_trace_id": estimate_trace_id,
-            "standard_car_type": standard_car_type,
-            "estimated_price": estimated_price,
-            "estimated_duration": estimated_duration,
-            "estimated_distance": estimated_distance,
-            "from_name": from_name,
-            "to_name": to_name,
-            "status": "mock_created",
+            "ok": True,
+            "data": {
+                "estimate_trace_id": estimate_trace_id,
+                "standard_car_type": standard_car_type,
+                "estimated_price": estimated_price,
+                "estimated_duration": estimated_duration,
+                "estimated_distance": estimated_distance,
+                "from_name": from_name,
+                "to_name": to_name,
+            }
         }
 
 

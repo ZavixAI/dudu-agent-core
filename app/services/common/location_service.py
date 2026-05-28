@@ -6,6 +6,7 @@ import httpx
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
 from loguru import logger
+from schema.mcp import MCPToolResponse
 from schema.common.location import LocationSearchResult, RawLocationSearchResponse
 
 async def search_location(
@@ -87,10 +88,9 @@ async def search_location(
         len(result.locations),
     )
 
-    return {
-        "items": [location.model_dump() for location in result.locations],
-        # "formatted_text": result.to_display_text(),
-    }
+    return MCPToolResponse(
+        data=[location.model_dump() for location in result.locations],
+    ).model_dump()
 
 
 __all__ = [
