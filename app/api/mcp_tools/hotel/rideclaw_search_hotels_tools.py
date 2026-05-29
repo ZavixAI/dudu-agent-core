@@ -13,7 +13,7 @@ def register_rideclaw_search_hotels_tools(mcp_app) -> None:
     """注册 RideClaw 酒店搜索 MCP 工具。"""
 
     @mcp_app.tool(
-        name="search_hotels",
+        name="hotel_search",
         description="根据目的地和入住日期搜索酒店，支持价格、星级、评分、距离、品牌和设施筛选。",
     )
     async def rideclaw_search_hotels(

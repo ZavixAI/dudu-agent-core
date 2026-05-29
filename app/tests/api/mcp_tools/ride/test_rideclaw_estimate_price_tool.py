@@ -58,7 +58,7 @@ def _get_estimate_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
     module.register_rideclaw_estimate_price_tools(mcp_app)
-    return mcp_app.tools["estimate_price"]["func"]
+    return mcp_app.tools["ride_estimate_price"]["func"]
 
 
 def test_estimate_tool_returns_unified_response(monkeypatch) -> None:

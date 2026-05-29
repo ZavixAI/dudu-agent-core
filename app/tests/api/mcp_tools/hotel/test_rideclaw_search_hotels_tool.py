@@ -60,7 +60,7 @@ def _get_search_hotels_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
     module.register_rideclaw_search_hotels_tools(mcp_app)
-    return mcp_app.tools["search_hotels"]["func"]
+    return mcp_app.tools["hotel_search"]["func"]
 
 
 def test_search_hotels_tool_returns_unified_response(monkeypatch) -> None:

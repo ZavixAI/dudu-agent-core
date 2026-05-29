@@ -12,7 +12,7 @@ def register_rideclaw_search_location_tools(mcp_app) -> None:
     """注册 RideClaw 位置搜索 MCP 工具。"""
 
     @mcp_app.tool(
-        name="search_location",
+        name="location_search",
         description="根据关键词、地区和半径搜索候选地点。",
     )
     async def rideclaw_search_location(
