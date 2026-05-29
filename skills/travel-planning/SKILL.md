@@ -19,13 +19,13 @@ description: 当用户需要整体规划跨城交通、酒店和到达后打车�
 1. 用户提出整体规划需求后，先补齐出发地、目的地、出发日期、返回日期或入住天数。
 2. 将需求拆成跨城交通、酒店和可选的同城接驳打车；整体规划默认需要往返跨城交通，除非用户明确只要单程。
 3. 调用 `search_transport_options` 查询跨城交通方案；默认分别按出发日期查去程、按返回日期查返程。
-4. 调用 `search_hotels` 查询酒店列表。
+4. 调用 `hotel_search` 查询酒店列表。
 5. 用户选择交通方案后，按交通类型调用对应工具生成待支付交通订单数据。
 6. 用户选择酒店后，调用 `filter_hotel_rooms` 查询该酒店可订房型。
 7. 用户选择房型后，调用 `create_pending_payment_hotel_order` 生成待支付酒店订单数据。
 8. 基于交通待支付数据中的到达站点/机场，以及酒店搜索或房型结果中的酒店地址，判断是否需要安排站点到酒店的同城接驳。
-9. 需要接驳时，调用 `search_location` 验证站点和酒店地址。
-10. 调用 `estimate_price` 获取接驳打车报价。
+9. 需要接驳时，调用 `location_search` 验证站点和酒店地址。
+10. 调用 `ride_estimate_price` 获取接驳打车报价。
 11. 用户选择车型后，调用 `create_pending_payment_taxi_order` 生成打车待支付订单。
 
 ## 信息要求
@@ -54,19 +54,19 @@ description: 当用户需要整体规划跨城交通、酒店和到达后打车�
 
 - 接驳打车的上车点优先使用交通待支付数据或用户选择方案中的到达机场、车站或下车站点。
 - 接驳打车的目的地优先使用酒店搜索、房型查询或用户选择酒店中的酒店地址。
-- 必须先调用 `search_location` 验证接驳上车点和目的地，再调用 `estimate_price`。
-- 调用 `estimate_price` 工具拿到车辆报价时，调用后用户可以看到工具执行的结果，仅输出“请选择您想要的车型”，不允许输出任何其他信息。
+- 必须先调用 `location_search` 验证接驳上车点和目的地，再调用 `ride_estimate_price`。
+- 调用 `ride_estimate_price` 工具拿到车辆报价时，调用后用户可以看到工具执行的结果，仅输出“请选择您想要的车型”，不允许输出任何其他信息。
 - 用户选择车型后调用 `create_pending_payment_taxi_order` 生成打车待支付订单数据，调用后用户可以看到结果，仅需输出“请完成支付”，禁止输出额外内容，`create_pending_payment_taxi_order` 成功后该打车子任务结束。
 
 ## 图示流程
 
 1. 用户说明跨城目的地、出发日期和停留时间。
 2. 调用 `search_transport_options` 查询跨城交通；默认分别查询去程和返程。
-3. 调用 `search_hotels` 查询酒店列表。
+3. 调用 `hotel_search` 查询酒店列表。
 4. 用户确认交通方案后，按类型调用 `create_pending_payment_flight_order`、`create_pending_payment_train_order` 或 `create_pending_payment_bus_order`；往返场景对去程和返程分别调用。
 5. 用户确认酒店后调用 `filter_hotel_rooms`，再根据用户选择调用 `create_pending_payment_hotel_order`。
 6. 基于交通和酒店的待支付数据、搜索结果或用户选择项判断是否需要接驳。
-7. 需要接驳时调用 `search_location`、`estimate_price` 和 `create_pending_payment_taxi_order`。
+7. 需要接驳时调用 `location_search`、`ride_estimate_price` 和 `create_pending_payment_taxi_order`。
 
 ## 拆解指引
 
@@ -81,9 +81,9 @@ description: 当用户需要整体规划跨城交通、酒店和到达后打车�
 - 工具结果已经展示给用户时，不重复输出完整列表。
 - 不能编造交通、酒店、房型、打车报价或订单状态。
 - 调用 `search_transport_options` 后，只提示用户选择交通方案。
-- 调用 `search_hotels` 后，只提示用户选择酒店。
+- 调用 `hotel_search` 后，只提示用户选择酒店。
 - 调用 `filter_hotel_rooms` 后，只提示用户选择房型。
-- 调用 `estimate_price` 后，只能输出：请选择您想要的车型
+- 调用 `ride_estimate_price` 后，只能输出：请选择您想要的车型
 - 调用 `create_pending_payment_taxi_order` 成功后，只能输出：请完成支付
 - 调用交通或酒店待支付订单工具成功后，可以提示用户完成支付，并继续推动下一个未完成环节。
 - 当交通和酒店都已生成待支付数据且没有未完成选择时，可以询问用户是否需要安排到站/机场/车站到酒店的接驳打车。
@@ -94,9 +94,9 @@ description: 当用户需要整体规划跨城交通、酒店和到达后打车�
 - create_pending_payment_flight_order
 - create_pending_payment_train_order
 - create_pending_payment_bus_order
-- search_hotels
+- hotel_search
 - filter_hotel_rooms
 - create_pending_payment_hotel_order
-- search_location
-- estimate_price
+- location_search
+- ride_estimate_price
 - create_pending_payment_taxi_order

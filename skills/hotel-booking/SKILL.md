@@ -18,7 +18,7 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 
 1. 用户提出酒店需求后，先判断是否已经具备酒店搜索所需信息。
 2. 补齐入住目的地、入住日期、离店日期或入住晚数；如果用户给出价格、星级、位置、品牌等偏好，一并用于搜索。
-3. 调用 `search_hotels` 查询酒店列表。
+3. 调用 `hotel_search` 查询酒店列表。
 4. 用户选择酒店后，调用 `filter_hotel_rooms` 获取该酒店可订房型。
 5. 用户选择房型后，调用 `create_pending_payment_hotel_order` 生成待支付酒店订单数据。
 6. `create_pending_payment_hotel_order` 成功后，前端基于返回数据创建支付卡片。
@@ -37,7 +37,7 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 
 ## 酒店与房型选择
 
-- 调用 `search_hotels` 后，工具结果对用户可见时，不重复罗列酒店列表，只提示用户选择酒店。
+- 调用 `hotel_search` 后，工具结果对用户可见时，不重复罗列酒店列表，只提示用户选择酒店。
 - 用户选择酒店后再调用 `filter_hotel_rooms`，不要在没有酒店选择时直接查房型。
 - 调用 `filter_hotel_rooms` 后，工具结果对用户可见时，不重复罗列房型列表，只提示用户选择房型。
 - 用户明确选择房型时，优先理解为确认生成待支付酒店订单数据，而不是修改酒店搜索条件。
@@ -47,7 +47,7 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 - 调用 `create_pending_payment_hotel_order` 前，必须已经有明确酒店、房型和产品。
 - 用户选择房型时同时复述入住日期、离店日期或酒店名称，且与当前上下文一致时，视为确认订单信息。
 - `create_pending_payment_hotel_order` 成功后，不重复订单明细，只引导用户完成支付。
-- `create_pending_payment_hotel_order` 需要使用 `search_hotels` 或 `filter_hotel_rooms` 返回中的 `search_id`，酒店结果中的 `supplier` 或 `hotel_type`，酒店 `hotel_id`，以及用户选择房型产品的 `product_id`。不要编造这些字段；缺少时先重新查询房型。
+- `create_pending_payment_hotel_order` 需要使用 `hotel_search` 或 `filter_hotel_rooms` 返回中的 `search_id`，酒店结果中的 `supplier` 或 `hotel_type`，酒店 `hotel_id`，以及用户选择房型产品的 `product_id`。不要编造这些字段；缺少时先重新查询房型。
 
 ## 边界指引
 
@@ -60,12 +60,12 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 - 工具结果已经展示给用户时，不重复罗列酒店或房型明细。
 - 信息缺失时，只追问当前最关键的一个字段。
 - 不能编造酒店、房型、价格、库存或订单状态。
-- 调用 `search_hotels` 后，只提示用户选择酒店。
+- 调用 `hotel_search` 后，只提示用户选择酒店。
 - 调用 `filter_hotel_rooms` 后，只提示用户选择房型。
 - 调用 `create_pending_payment_hotel_order` 成功后，只提示用户完成支付。
 
 ## 相关工具
 
-- search_hotels
+- hotel_search
 - filter_hotel_rooms
 - create_pending_payment_hotel_order
