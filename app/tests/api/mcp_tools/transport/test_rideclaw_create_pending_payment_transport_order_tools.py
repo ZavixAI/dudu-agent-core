@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.transport import order_service
 
@@ -85,7 +86,13 @@ def test_create_pending_payment_flight_order_tool_returns_snapshot(monkeypatch) 
         )
     )
 
-    assert result == {"ok": True, "data": expected_data}
+    assert result == {
+        "ok": True,
+        "data": expected_data,
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        ),
+    }
     assert fake_client.posts == [
         {
             "url": "/apitest/v1/flight/snapshot/lookup",
@@ -163,6 +170,9 @@ def test_create_pending_payment_train_order_tool_returns_normalized_snapshot(mon
             "from_city": "深圳",
             "to_city": "广州",
         },
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        ),
     }
     assert fake_client.posts[0] == {
         "url": "/apitest/v1/train/snapshot/lookup",
@@ -232,6 +242,9 @@ def test_create_pending_payment_bus_order_tool_returns_normalized_snapshot(monke
             "to_city": "广州",
             "search_id": "search-1",
         },
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        ),
     }
     assert fake_client.posts[0] == {
         "url": "/apitest/v1/bus/snapshot/lookup",

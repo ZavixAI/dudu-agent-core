@@ -8,6 +8,7 @@ from typing import Any
 import httpx
 from loguru import logger
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
 from schema.hotel import RawHotelOrderSnapshotResponse
@@ -125,7 +126,11 @@ async def create_pending_payment_hotel_order(
         clean_hotel_id,
         clean_product_id,
     )
-    return MCPToolResponse(data=parsed_data).model_dump()
+    response_payload = MCPToolResponse(data=parsed_data).model_dump()
+    response_payload["assistant_response_instruction"] = (
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+    )
+    return response_payload
 
 
 __all__ = [

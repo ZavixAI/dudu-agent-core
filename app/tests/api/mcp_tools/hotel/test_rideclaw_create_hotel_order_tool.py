@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.hotel import order_service
 
@@ -87,7 +88,13 @@ def test_create_pending_payment_hotel_order_tool_returns_snapshot_dict(monkeypat
         )
     )
 
-    assert result == {"ok": True, "data": expected_data}
+    assert result == {
+        "ok": True,
+        "data": expected_data,
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        ),
+    }
     assert fake_client.posts == [
         {
             "url": "/apitest/v1/hotel/snapshot/lookup",
@@ -128,6 +135,9 @@ def test_create_pending_payment_hotel_order_tool_parses_snapshot_json_string(mon
     assert result == {
         "ok": True,
         "data": {"hotel_id": "hotel-1", "product_id": "product-1"},
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        ),
     }
 
 

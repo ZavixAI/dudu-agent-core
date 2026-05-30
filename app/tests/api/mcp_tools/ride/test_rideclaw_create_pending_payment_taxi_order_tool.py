@@ -9,6 +9,8 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
+
 MODULE_NAME = "api.mcp_tools.ride.rideclaw_create_pending_payment_taxi_order_tools"
 
 
@@ -60,4 +62,7 @@ def test_create_pending_payment_taxi_order_tool_returns_unified_response() -> No
             "from_name": "天安门",
             "to_name": "北京站",
         },
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        ),
     }

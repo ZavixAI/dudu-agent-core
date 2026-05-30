@@ -7,6 +7,7 @@ from typing import Any
 import httpx
 from loguru import logger
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
 from schema.mcp import MCPToolResponse
@@ -124,7 +125,11 @@ async def create_pending_payment_flight_order(
         request_body,
         "RIDECLOW_FLIGHT_ORDER_SNAPSHOT",
     )
-    return MCPToolResponse(data=data).model_dump()
+    response_payload = MCPToolResponse(data=data).model_dump()
+    response_payload["assistant_response_instruction"] = (
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+    )
+    return response_payload
 
 
 async def create_pending_payment_train_order(
@@ -179,7 +184,11 @@ async def create_pending_payment_train_order(
         "from_city": item.get("from_city", ""),
         "to_city": item.get("to_city", ""),
     }
-    return MCPToolResponse(data=result_payload).model_dump()
+    response_payload = MCPToolResponse(data=result_payload).model_dump()
+    response_payload["assistant_response_instruction"] = (
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+    )
+    return response_payload
 
 
 async def create_pending_payment_bus_order(
@@ -220,7 +229,11 @@ async def create_pending_payment_bus_order(
         "to_city": item.get("to_city", ""),
         "search_id": item.get("search_id", clean_search_id),
     }
-    return MCPToolResponse(data=result_payload).model_dump()
+    response_payload = MCPToolResponse(data=result_payload).model_dump()
+    response_payload["assistant_response_instruction"] = (
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+    )
+    return response_payload
 
 
 __all__ = [

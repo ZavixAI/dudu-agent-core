@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.ride import estimate_service
 
@@ -84,7 +85,13 @@ def test_estimate_tool_returns_unified_response(monkeypatch) -> None:
         )
     )
 
-    assert result == {"ok": True, "data": expected_data}
+    assert result == {
+        "ok": True,
+        "data": expected_data,
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+        ),
+    }
 
 
 def test_estimate_tool_filters_selected_car_type(monkeypatch) -> None:
@@ -135,6 +142,9 @@ def test_estimate_tool_filters_selected_car_type(monkeypatch) -> None:
             },
             "estimate_trace_id": "AGG_trace_1",
         },
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+        ),
     }
 
 
