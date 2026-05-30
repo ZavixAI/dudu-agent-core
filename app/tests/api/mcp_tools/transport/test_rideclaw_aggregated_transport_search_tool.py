@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.transport import search_service
 
@@ -340,7 +341,13 @@ def test_aggregated_transport_search_tool_returns_unified_response(monkeypatch) 
         )
     )
 
-    assert result == {"ok": True, "data": expected_data}
+    assert result == {
+        "ok": True,
+        "data": expected_data,
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_TRANSPORT_OPTIONS
+        ),
+    }
     assert fake_client.posts[0] == {
         "url": "/apitest/v1/tool/geocode",
         "json": {"address": "深圳北", "is_cn": True},
@@ -395,7 +402,13 @@ def test_aggregated_transport_search_tool_accepts_single_mode_enum(monkeypatch) 
         )
     )
 
-    assert result == {"ok": True, "data": {"train_data": {"trains": []}}}
+    assert result == {
+        "ok": True,
+        "data": {"train_data": {"trains": []}},
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_TRANSPORT_OPTIONS
+        ),
+    }
     assert fake_client.posts[2]["json"]["modes"] == ["train"]
 
 
