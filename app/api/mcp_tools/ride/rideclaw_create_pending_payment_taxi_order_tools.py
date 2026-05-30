@@ -4,6 +4,8 @@ from typing import Annotated, Union
 
 from pydantic import Field
 
+from config import constants
+
 
 def register_rideclaw_create_pending_payment_taxi_order_tools(mcp_app) -> None:
     """注册 RideClaw 创建打车待支付订单 MCP 工具。"""
@@ -55,6 +57,9 @@ def register_rideclaw_create_pending_payment_taxi_order_tools(mcp_app) -> None:
                 "from_name": from_name,
                 "to_name": to_name,
             },
+            "assistant_response_instruction": (
+                constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+            ),
         }
 
 

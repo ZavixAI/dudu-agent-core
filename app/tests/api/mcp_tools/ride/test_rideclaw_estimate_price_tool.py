@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.ride import estimate_service
 
@@ -84,7 +85,67 @@ def test_estimate_tool_returns_unified_response(monkeypatch) -> None:
         )
     )
 
-    assert result == {"ok": True, "data": expected_data}
+    assert result == {
+        "ok": True,
+        "data": expected_data,
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+        ),
+    }
+
+
+def test_estimate_tool_filters_selected_car_type(monkeypatch) -> None:
+    expected_data = {
+        "economy": {
+            "available": True,
+            "estimated_price": 18.21,
+        },
+        "premium": {
+            "available": True,
+            "estimated_price": 27.97,
+        },
+        "business": {
+            "available": True,
+            "estimated_price": 42.72,
+        },
+        "luxury": {
+            "available": True,
+            "estimated_price": 98,
+        },
+        "estimate_trace_id": "AGG_trace_1",
+    }
+
+    async def fake_get_http_client(service_name: str) -> FakeHTTPClient:
+        assert service_name == "rideclaw"
+        return FakeHTTPClient({"code": 0, "message": "success", "data": expected_data})
+
+    monkeypatch.setattr(estimate_service, "get_http_client", fake_get_http_client)
+
+    result = asyncio.run(
+        _get_estimate_tool()(
+            from_lng="116.397128",
+            from_lat="39.916527",
+            from_name="天安门",
+            to_lng="116.407396",
+            to_lat="39.904200",
+            to_name="北京站",
+            standard_car_type="premium",
+        )
+    )
+
+    assert result == {
+        "ok": True,
+        "data": {
+            "premium": {
+                "available": True,
+                "estimated_price": 27.97,
+            },
+            "estimate_trace_id": "AGG_trace_1",
+        },
+        "assistant_response_instruction": (
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+        ),
+    }
 
 
 @pytest.mark.parametrize(

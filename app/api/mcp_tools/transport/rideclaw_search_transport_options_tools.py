@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import Field
 
@@ -46,9 +46,9 @@ def register_rideclaw_search_transport_options_tools(mcp_app) -> None:
             Field(description="用户登录令牌；没有登录态时可为空。"),
         ] = None,
         modes: Annotated[
-            str | list[str] | None,
-            Field(description='交通方式，可选 flight、train、bus；支持数组或 JSON 字符串，例如 ["flight","train"]。'),
-        ] = None,
+            Literal["flight", "train", "bus", "all"],
+            Field(description="交通方式，可选 flight、train、bus、all；默认 all。"),
+        ] = "all",
     ) -> dict[str, object]:
         """搜索交通方案并返回结构化结果。"""
 
@@ -60,7 +60,7 @@ def register_rideclaw_search_transport_options_tools(mcp_app) -> None:
             earliest_departure_time=earliest_departure_time,
             latest_arrival_time=latest_arrival_time,
             user_token=user_token,
-            modes=modes,
+            modes=None if modes == "all" else [modes],
         )
 
 

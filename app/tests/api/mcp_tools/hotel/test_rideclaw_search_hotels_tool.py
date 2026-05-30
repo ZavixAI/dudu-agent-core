@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.hotel import search_service
 
@@ -152,7 +153,11 @@ def test_search_hotels_tool_returns_unified_response(monkeypatch) -> None:
         )
     )
 
-    assert result == {"ok": True, "data": expected_data}
+    assert result == {
+        "ok": True,
+        "data": expected_data,
+        "next_action_suggestions": constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_SEARCH,
+    }
     assert fake_client.posts[0] == {
         "url": "/apitest/v1/tool/geocode",
         "json": {"address": "北京市朝阳区三里屯", "is_cn": True},
@@ -232,6 +237,10 @@ def test_search_hotels_tool_compacts_content_hotels(monkeypatch) -> None:
     )
 
     assert result["data"]["search_id"] == "search-1"
+    assert (
+        result["next_action_suggestions"]
+        == constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_SEARCH
+    )
     assert result["data"]["total_count"] == 1
     assert result["data"]["hotels"][0]["hotel_id"] == "hotel-1"
     assert result["data"]["hotels"][0]["supplier"] == "meituan"

@@ -12,6 +12,7 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from services.common import location_service
 
@@ -102,6 +103,9 @@ def test_search_location_tool_returns_unified_response(monkeypatch) -> None:
                 "adcode": "110101",
             }
         ],
+        "next_action_suggestions": (
+            constants.NEXT_ACTION_SUGGESTIONS_FOR_LOCATION_SEARCH
+        ),
     }
 
 

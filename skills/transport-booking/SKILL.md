@@ -37,7 +37,8 @@ description: 当用户需要跨城出行、机票/火车/巴士方案搜索、�
 
 ## 方案选择
 
-- 调用 `search_transport_options` 后，工具结果对用户可见时，不重复罗列全部方案，只提示用户选择合适的交通方案。
+- 跨城交通搜索统一使用 `search_transport_options`；不要使用单独的航班、火车或巴士搜索工具。
+- 调用 `search_transport_options` 后，工具结果对用户可见时，不重复罗列全部方案；优先遵循工具返回的 `assistant_response_instruction`，再推动用户选择合适的交通方案。
 - 用户明确选择某个航班、车次、班次、时间或价格方案时，优先理解为确认生成待支付交通订单数据。
 - 用户反馈价格高、时间不合适、想换交通方式时，按修改需求重新搜索或筛选，不直接下单。
 
@@ -48,7 +49,7 @@ description: 当用户需要跨城出行、机票/火车/巴士方案搜索、�
 - 用户选择火车方案时，调用 `create_pending_payment_train_order`。
 - 用户选择巴士方案时，调用 `create_pending_payment_bus_order`。
 - 用户选择方案时同时复述出发地、目的地或日期，且与当前上下文一致时，视为确认订单信息。
-- 待支付订单工具成功后，不重复订单明细，只引导用户完成支付。
+- 待支付订单工具成功后，不重复订单明细，遵循工具返回的 `assistant_response_instruction`。
 - 调用 `create_pending_payment_flight_order` 时，使用航班搜索返回的 `search_token`、出发日期、用户选择航班的 `flight_id` 或 `flightId`、用户选择舱位的 `cabin_fare_id` 或 `cabinFareId`。
 - 调用 `create_pending_payment_train_order` 时，使用交通搜索返回的 `search_id`、用户选择车次的 `train_no` 或 `trainNo`、用户选择席别的 `seat_type_name` 或 `seatTypeName`、出发日期。
 - 调用 `create_pending_payment_bus_order` 时，使用交通搜索返回的 `search_id` 和用户选择班次的 `gid`。
@@ -73,8 +74,8 @@ description: 当用户需要跨城出行、机票/火车/巴士方案搜索、�
 - 工具结果已经展示给用户时，不重复罗列全部方案。
 - 信息缺失时，只追问当前最关键的一个字段。
 - 不能编造班次、航班、票价、余票或订单状态。
-- 调用 `search_transport_options` 后，只提示用户选择合适的交通方案。
-- 调用任一交通待支付订单工具成功后，只提示用户完成支付。
+- 调用 `search_transport_options` 后，遵循 `assistant_response_instruction`，并推动用户选择交通方案。
+- 调用任一交通待支付订单工具成功后，遵循 `assistant_response_instruction`。
 
 ## 相关工具
 

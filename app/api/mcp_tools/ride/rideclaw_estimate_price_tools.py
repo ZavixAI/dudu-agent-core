@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from pydantic import Field
 from services.ride.estimate_service import estimate_ride_price
@@ -50,6 +50,12 @@ def register_rideclaw_estimate_price_tools(mcp_app) -> None:
                 description='乘车日期时间，格式为 "YYYY-MM-DD HH:mm"，例如 "2026-05-04 12:00"；选填，不传则为实时单，order_type=2 时必填。'
             ),
         ] = None,
+        standard_car_type: Annotated[
+            Literal["economy", "premium", "business", "luxury", "all"],
+            Field(
+                description="车型档位，可选 economy、premium、business、luxury、all；默认 all。"
+            ),
+        ] = "all",
         user_token: Annotated[
             str | None,
             Field(description="用户登录令牌；没有登录态时可为空。"),
@@ -66,6 +72,7 @@ def register_rideclaw_estimate_price_tools(mcp_app) -> None:
             to_name=to_name,
             order_type=order_type,
             booking_time_str=booking_time_str,
+            standard_car_type=standard_car_type,
             user_token=user_token,
         )
 

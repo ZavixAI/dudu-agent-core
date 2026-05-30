@@ -8,6 +8,7 @@ from typing import Any
 import httpx
 from loguru import logger
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
 from schema.hotel import RawHotelRoomFilterResponse
@@ -303,7 +304,14 @@ async def filter_hotel_rooms(
         clean_hotel_type,
         clean_hotel_id,
     )
-    return MCPToolResponse(data=_compact_room_filter_data(raw_response.data)).model_dump()
+    response_payload = MCPToolResponse(data=_compact_room_filter_data(raw_response.data)).model_dump()
+    response_payload["assistant_response_instruction"] = (
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_HOTEL_ROOMS
+    )
+    response_payload["next_action_suggestions"] = (
+        constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_ROOM_FILTER
+    )
+    return response_payload
 
 
 __all__ = [

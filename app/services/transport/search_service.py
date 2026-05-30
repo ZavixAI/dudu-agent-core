@@ -10,6 +10,7 @@ from typing import Any
 import httpx
 from loguru import logger
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
 from schema.mcp import MCPToolResponse
@@ -425,7 +426,13 @@ async def search_aggregated_transport(
         from_name,
         to_name,
     )
-    return MCPToolResponse(data=_filter_aggregated_transport_data(raw_response.data)).model_dump()
+    response_payload = MCPToolResponse(
+        data=_filter_aggregated_transport_data(raw_response.data)
+    ).model_dump()
+    response_payload["assistant_response_instruction"] = (
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_TRANSPORT_OPTIONS
+    )
+    return response_payload
 
 
 __all__ = [

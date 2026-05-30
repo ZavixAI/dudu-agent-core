@@ -6,6 +6,7 @@ from typing import Any
 import httpx
 from loguru import logger
 
+from config import constants
 from core.http.exceptions import AppHTTPException
 from core.infra.http_client import get_http_client
 from schema.hotel import RawHotelGeocodeResponse, RawHotelSearchResponse
@@ -367,7 +368,11 @@ async def search_hotels(
         )
 
     logger.info("RideClaw hotel search succeeded destination={}", clean_destination)
-    return MCPToolResponse(data=_compact_search_data(raw_response.data)).model_dump()
+    response_payload = MCPToolResponse(data=_compact_search_data(raw_response.data)).model_dump()
+    response_payload["next_action_suggestions"] = (
+        constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_SEARCH
+    )
+    return response_payload
 
 
 __all__ = [
