@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from zoneinfo import ZoneInfo
 
 import httpx
@@ -35,6 +35,37 @@ def _booking_time_to_millis(booking_time_str: str) -> int:
     return int(localized_booking_time.timestamp() * 1000)
 
 
+def _filter_estimate_data_by_car_type(
+    data: Any,
+    standard_car_type: Literal["economy", "premium", "business", "luxury", "all"],
+) -> Any:
+    """Filter full quote payload by selected car type."""
+
+    if standard_car_type == "all" or not isinstance(data, dict):
+        return data
+
+    selected_quote = data.get(standard_car_type)
+    if selected_quote is None:
+        raise AppHTTPException(
+            status_code=404,
+            detail=f"RideClaw quote does not contain car type: {standard_car_type}",
+            error_code="RIDECLOW_QUOTE_CAR_TYPE_NOT_FOUND",
+            error_detail={
+                "standard_car_type": standard_car_type,
+                "available_car_types": [
+                    key for key in data.keys() if key != "estimate_trace_id"
+                ],
+            },
+        )
+
+    filtered_data: dict[str, Any] = {
+        standard_car_type: selected_quote,
+    }
+    if "estimate_trace_id" in data:
+        filtered_data["estimate_trace_id"] = data["estimate_trace_id"]
+    return filtered_data
+
+
 async def estimate_ride_price(
     from_lng: str,
     from_lat: str,
@@ -44,6 +75,7 @@ async def estimate_ride_price(
     to_name: str,
     order_type: int = 1,
     booking_time_str: str | None = None,
+    standard_car_type: Literal["economy", "premium", "business", "luxury", "all"] = "all",
     user_token: str | None = None,
 ) -> Any:
     """Estimate taxi quote through RideClaw."""
@@ -137,7 +169,11 @@ async def estimate_ride_price(
         to_name,
         order_type,
     )
-    return MCPToolResponse(data=raw_response.data).model_dump()
+    filtered_data = _filter_estimate_data_by_car_type(
+        raw_response.data,
+        standard_car_type=standard_car_type,
+    )
+    return MCPToolResponse(data=filtered_data).model_dump()
 
 
 __all__ = [
