@@ -1,6 +1,8 @@
 """Location domain services."""
 from typing import Any
 
+from config import constants
+
 import httpx
 
 from core.http.exceptions import AppHTTPException
@@ -88,9 +90,13 @@ async def search_location(
         len(result.locations),
     )
 
-    return MCPToolResponse(
+    response_payload = MCPToolResponse(
         data=[location.model_dump() for location in result.locations],
     ).model_dump()
+    response_payload["next_action_suggestions"] = (
+        constants.NEXT_ACTION_SUGGESTIONS_FOR_LOCATION_SEARCH
+    )
+    return response_payload
 
 
 __all__ = [
