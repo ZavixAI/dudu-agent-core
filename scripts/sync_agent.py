@@ -278,12 +278,6 @@ def fetch_agent(config: SyncConfig) -> dict | None:
 
 
 def ensure_available_skills(agent_payload: dict, skill_names: list[str]) -> bool:
-    current = agent_payload.get("availableSkills")
-    if current:
-        if not isinstance(current, list):
-            raise RuntimeError("Agent availableSkills must be a list when configured.")
-        print(f"Agent already has availableSkills configured: {len(current)} item(s)")
-        return False
 
     agent_payload["availableSkills"] = skill_names
     print("Configured agent availableSkills: " + ", ".join(skill_names))
@@ -291,12 +285,6 @@ def ensure_available_skills(agent_payload: dict, skill_names: list[str]) -> bool
 
 
 def ensure_available_tools(agent_payload: dict, tool_names: list[str]) -> bool:
-    current = agent_payload.get("availableTools")
-    if current:
-        if not isinstance(current, list):
-            raise RuntimeError("Agent availableTools must be a list when configured.")
-        print(f"Agent already has availableTools configured: {len(current)} item(s)")
-        return False
 
     agent_payload["availableTools"] = tool_names
     print("Configured agent availableTools: " + ", ".join(tool_names))
