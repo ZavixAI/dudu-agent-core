@@ -17,10 +17,10 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 ## 基础流程
 
 1. 用户提出酒店需求后，先判断是否已经具备酒店搜索所需信息。
-2. 补齐入住目的地、入住日期、离店日期或入住晚数；如果用户给出价格、星级、位置、品牌等偏好，一并用于搜索。
+2. 必须先补齐入住目的地、入住日期、离店日期或入住晚数，再调用 `hotel_search`；如果用户给出价格、星级、位置、品牌等偏好，一并用于搜索。
 3. 调用 `hotel_search` 查询酒店列表。
-4. 用户选择酒店后，调用 `filter_hotel_rooms` 获取该酒店可订房型。
-5. 用户选择房型后，调用 `create_pending_payment_hotel_order` 生成待支付酒店订单数据。
+4. 根据用户偏好和 `hotel_search` 返回结果选择合适酒店后，直接调用 `filter_hotel_rooms` 获取该酒店可订房型，不需要再多轮询问用户确认酒店。
+5. 根据用户偏好和房型结果选择合适房型产品后，直接调用 `create_pending_payment_hotel_order` 生成待支付酒店订单数据，不需要再多轮询问用户确认房型。
 6. `create_pending_payment_hotel_order` 成功后，前端基于返回数据创建支付卡片。
 
 ## 信息要求
@@ -35,18 +35,21 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 
 如果用户只说“今天入住”但没有离店日期，优先追问离店日期或住几晚。
 
+在缺少入住日期、离店日期或入住晚数时，不要先调用 `hotel_search`；先通过多轮对话一次性补齐当前搜索必需信息，再开始搜索。不要查一步问一步。
+
 ## 酒店与房型选择
 
-- 调用 `hotel_search` 后，工具结果对用户可见时，不重复罗列酒店列表；如果返回 `next_action_suggestions`，按建议推动用户选择酒店并进入房型查询。
-- 用户选择酒店后再调用 `filter_hotel_rooms`，不要在没有酒店选择时直接查房型。
+- 调用 `hotel_search` 后，工具结果对用户可见时，不重复罗列酒店列表；优先根据用户偏好选择合适酒店并进入房型查询。
+- 如果用户已经给出明确偏好且搜索结果中存在明显匹配酒店，直接调用 `filter_hotel_rooms`；只有结果不明确、多个候选无法判断或缺少关键偏好时，才询问用户选择酒店。
 - 调用 `filter_hotel_rooms` 后，工具结果对用户可见时，不重复罗列房型列表；优先遵循工具返回的 `assistant_response_instruction`，并按 `next_action_suggestions` 推动用户选择房型。
 - 用户明确选择房型时，优先理解为确认生成待支付酒店订单数据，而不是修改酒店搜索条件。
 
 ## 确认下单
 
 - 调用 `create_pending_payment_hotel_order` 前，必须已经有明确酒店、房型和产品。
+- 如果 `filter_hotel_rooms` 返回中存在符合用户偏好的推荐或最低价可订产品，可以直接调用 `create_pending_payment_hotel_order`；只有房型选择不明确或偏好冲突时才询问用户。
 - 用户选择房型时同时复述入住日期、离店日期或酒店名称，且与当前上下文一致时，视为确认订单信息。
-- `create_pending_payment_hotel_order` 成功后，不重复订单明细，遵循工具返回的 `assistant_response_instruction`。
+- `create_pending_payment_hotel_order` 成功后，调用后用户可以看到结果，仅需输出“这是给您的推荐酒店”，禁止输出额外内容。
 - `create_pending_payment_hotel_order` 需要使用 `hotel_search` 或 `filter_hotel_rooms` 返回中的 `search_id`，酒店结果中的 `supplier` 或 `hotel_type`，酒店 `hotel_id`，以及用户选择房型产品的 `product_id`。不要编造这些字段；缺少时先重新查询房型。
 
 ## 边界指引
@@ -62,7 +65,7 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 - 不能编造酒店、房型、价格、库存或订单状态。
 - 调用 `hotel_search` 后，不重复酒店明细，结合 `next_action_suggestions` 推动下一步。
 - 调用 `filter_hotel_rooms` 后，遵循 `assistant_response_instruction`，并结合 `next_action_suggestions` 推动下一步。
-- 调用 `create_pending_payment_hotel_order` 成功后，遵循 `assistant_response_instruction`。
+- 调用 `create_pending_payment_hotel_order` 成功后，只能输出：这是给您的推荐酒店
 
 ## 相关工具
 

@@ -58,7 +58,7 @@ def register_create_pending_payment_taxi_order_tools(mcp_app) -> None:
                 "to_name": to_name,
             },
             "assistant_response_instruction": (
-                constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+                constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_TAXI_ORDER
             ),
         }
 

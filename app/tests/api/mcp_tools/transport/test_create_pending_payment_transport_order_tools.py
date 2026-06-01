@@ -171,7 +171,7 @@ def test_create_pending_payment_train_order_tool_returns_normalized_snapshot(mon
             "to_city": "广州",
         },
         "assistant_response_instruction": (
-            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_TRAIN_ORDER
         ),
     }
     assert fake_client.posts[0] == {

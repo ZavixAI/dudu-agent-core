@@ -186,7 +186,7 @@ async def create_pending_payment_train_order(
     }
     response_payload = MCPToolResponse(data=result_payload).model_dump()
     response_payload["assistant_response_instruction"] = (
-        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_ORDER
+        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_TRAIN_ORDER
     )
     return response_payload
 

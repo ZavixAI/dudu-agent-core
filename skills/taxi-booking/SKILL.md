@@ -51,7 +51,9 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 ## 估价与车型
 
 - 估价前必须确认上车点和目的地都已验证。
-- 调用 `ride_estimate_price` 工具拿到车辆报价时，工具结果会带有 `assistant_response_instruction`；必须遵循该指引，不重复报价明细。
+- 预约用车可以通过 `ride_estimate_price` 传 `order_type=2` 和 `booking_time_str`；`booking_time_str` 格式为 `YYYY-MM-DD HH:mm`。
+- 如果是送站打车且已知交通出发时间，应优先按预约单传时间；无法可靠推算上车时间时，先追问用户希望几点出发。
+- 调用 `ride_estimate_price` 工具拿到车辆报价时，调用后用户可以看到工具执行结果，仅需输出“请选择您想要的车型”，禁止输出额外内容。
 - 估价后必须等待用户选择车型，除非用户在同一轮已经明确指定车型且上下车点已确认。
 - 报价过期、用户明确修改上下车点，或用户反馈价格后需要重新估价。
 
@@ -69,9 +71,15 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 
 如果用户选择车型时同时复述上车点和目的地，且地点与当前已验证地点语义一致，视为确认订单信息，直接进入下单。
 
-调用 `create_pending_payment_taxi_order` 工具生成待支付订单，调用后用户可以看到结果；必须遵循工具返回的 `assistant_response_instruction`，不重复订单明细，`create_pending_payment_taxi_order` 成功后任务结束。
+调用 `create_pending_payment_taxi_order` 工具生成待支付订单，调用后用户可以看到结果，仅需输出“请点击完成支付”，禁止输出额外内容，`create_pending_payment_taxi_order` 成功后任务结束。
 
 `create_pending_payment_taxi_order` 需要使用 `ride_estimate_price` 返回中的 `estimate_trace_id`、用户选择车型对应的 `standard_car_type`、`estimated_price`、`estimated_duration`、`estimated_distance`，以及当前上车点和目的地名称。不要编造这些字段；缺少时先让用户重新选择或重新估价。
+
+## 支付与取消后续
+
+- `create_pending_payment_taxi_order` 成功后，支付、取消或订单确认都由前端卡片承接。
+- 如果用户后续要求“支付、去支付、完成支付、取消、不要了、重新取消订单”，不要再次调用打车下单工具，也不要声称已支付或已取消。
+- 统一引导用户和卡片交互，例如让用户点击卡片上的支付或取消操作。
 
 ## 修改需求
 
@@ -87,8 +95,8 @@ description: 当用户需要同城打车、查询地点经纬度、获取车辆�
 - 信息缺失时，只问一个最关键的问题。
 - 工具结果已经展示给用户时，不重复输出工具明细。
 - 不能确认的状态不要说已经完成。
-- 调用 `ride_estimate_price` 后，遵循工具返回的 `assistant_response_instruction`。
-- 调用 `create_pending_payment_taxi_order` 成功后，遵循工具返回的 `assistant_response_instruction`。
+- 调用 `ride_estimate_price` 后，只能输出：请选择您想要的车型
+- 调用 `create_pending_payment_taxi_order` 成功后，只能输出：请点击完成支付
 
 ## 相关工具
 
