@@ -304,14 +304,7 @@ async def filter_hotel_rooms(
         clean_hotel_type,
         clean_hotel_id,
     )
-    response_payload = MCPToolResponse(data=_compact_room_filter_data(raw_response.data)).model_dump()
-    response_payload["assistant_response_instruction"] = (
-        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_HOTEL_ROOMS
-    )
-    response_payload["next_action_suggestions"] = (
-        constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_ROOM_FILTER
-    )
-    return response_payload
+    return MCPToolResponse(data=_compact_room_filter_data(raw_response.data)).model_dump()
 
 
 __all__ = [

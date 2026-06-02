@@ -12,7 +12,6 @@ APP_DIR = Path(__file__).resolve().parents[4]
 if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
-from config import constants
 from core.http.exceptions import AppHTTPException
 from services.hotel import room_service
 
@@ -207,12 +206,6 @@ def test_filter_hotel_rooms_tool_returns_unified_response(monkeypatch) -> None:
     assert result == {
         "ok": True,
         "data": expected_data,
-        "assistant_response_instruction": (
-            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_HOTEL_ROOMS
-        ),
-        "next_action_suggestions": (
-            constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_ROOM_FILTER
-        ),
     }
     assert fake_client.posts == [
         {
@@ -272,14 +265,6 @@ def test_filter_hotel_rooms_tool_limits_room_groups(monkeypatch) -> None:
         )
     )
 
-    assert (
-        result["assistant_response_instruction"]
-        == constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_HOTEL_ROOMS
-    )
-    assert (
-        result["next_action_suggestions"]
-        == constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_ROOM_FILTER
-    )
     assert result["data"]["total_group_count"] == 13
     assert len(result["data"]["room_groups"]) == 12
     assert result["data"]["room_groups"][-1]["room_type_info"]["room_id"] == "room-11"
