@@ -41,7 +41,7 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 
 - 调用 `hotel_search` 后，工具结果对用户可见时，不重复罗列酒店列表；优先根据用户偏好选择合适酒店并进入房型查询。
 - 如果用户已经给出明确偏好且搜索结果中存在明显匹配酒店，直接调用 `filter_hotel_rooms`；只有结果不明确、多个候选无法判断或缺少关键偏好时，才询问用户选择酒店。
-- 调用 `filter_hotel_rooms` 后，工具结果对用户可见时，不重复罗列房型列表；优先遵循工具返回的 `assistant_response_instruction`，并按 `next_action_suggestions` 推动用户选择房型。
+- 调用 `filter_hotel_rooms` 后，工具结果对用户可见时，不重复罗列房型列表；如果存在明显符合偏好的房型产品，直接进入待支付订单生成。
 - 用户明确选择房型时，优先理解为确认生成待支付酒店订单数据，而不是修改酒店搜索条件。
 
 ## 确认下单
@@ -63,8 +63,8 @@ description: 当用户需要酒店查询、房型报价、选择房型并生成�
 - 工具结果已经展示给用户时，不重复罗列酒店或房型明细。
 - 信息缺失时，只追问当前最关键的一个字段。
 - 不能编造酒店、房型、价格、库存或订单状态。
-- 调用 `hotel_search` 后，不重复酒店明细，结合 `next_action_suggestions` 推动下一步。
-- 调用 `filter_hotel_rooms` 后，遵循 `assistant_response_instruction`，并结合 `next_action_suggestions` 推动下一步。
+- 调用 `hotel_search` 后，不重复酒店明细；如果工具返回 `next_action_suggestions` 则参考它，否则按本技能规则进入房型查询。
+- 调用 `filter_hotel_rooms` 后，不重复房型明细；如果工具返回 `assistant_response_instruction` 或 `next_action_suggestions` 则参考它，否则按本技能规则选择合适房型或生成待支付订单。
 - 调用 `create_pending_payment_hotel_order` 成功后，只能输出：这是给您的推荐酒店
 
 ## 相关工具
