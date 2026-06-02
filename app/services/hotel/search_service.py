@@ -370,7 +370,7 @@ async def search_hotels(
     logger.info("RideClaw hotel search succeeded destination={}", clean_destination)
     response_payload = MCPToolResponse(data=_compact_search_data(raw_response.data)).model_dump()
     response_payload["next_action_suggestions"] = (
-        constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_SEARCH
+        constants.NEXT_ACTION_SUGGESTIONS["hotel_search"]
     )
     return response_payload
 

@@ -92,7 +92,7 @@ def test_create_pending_payment_hotel_order_tool_returns_snapshot_dict(monkeypat
         "ok": True,
         "data": expected_data,
         "assistant_response_instruction": (
-            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_HOTEL_ORDER
+            constants.ASSISTANT_RESPONSE_INSTRUCTIONS["hotel"]["pending_payment_order"]
         ),
     }
     assert fake_client.posts == [
@@ -136,7 +136,7 @@ def test_create_pending_payment_hotel_order_tool_parses_snapshot_json_string(mon
         "ok": True,
         "data": {"hotel_id": "hotel-1", "product_id": "product-1"},
         "assistant_response_instruction": (
-            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_PENDING_PAYMENT_HOTEL_ORDER
+            constants.ASSISTANT_RESPONSE_INSTRUCTIONS["hotel"]["pending_payment_order"]
         ),
     }
 

@@ -94,7 +94,7 @@ async def search_location(
         data=[location.model_dump() for location in result.locations],
     ).model_dump()
     response_payload["next_action_suggestions"] = (
-        constants.NEXT_ACTION_SUGGESTIONS_FOR_LOCATION_SEARCH
+        constants.NEXT_ACTION_SUGGESTIONS["location_search"]
     )
     return response_payload
 

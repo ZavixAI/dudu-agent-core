@@ -156,7 +156,7 @@ def test_search_hotels_tool_returns_unified_response(monkeypatch) -> None:
     assert result == {
         "ok": True,
         "data": expected_data,
-        "next_action_suggestions": constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_SEARCH,
+        "next_action_suggestions": constants.NEXT_ACTION_SUGGESTIONS["hotel_search"],
     }
     assert fake_client.posts[0] == {
         "url": "/apitest/v1/tool/geocode",
@@ -239,7 +239,7 @@ def test_search_hotels_tool_compacts_content_hotels(monkeypatch) -> None:
     assert result["data"]["search_id"] == "search-1"
     assert (
         result["next_action_suggestions"]
-        == constants.NEXT_ACTION_SUGGESTIONS_FOR_HOTEL_SEARCH
+        == constants.NEXT_ACTION_SUGGESTIONS["hotel_search"]
     )
     assert result["data"]["total_count"] == 1
     assert result["data"]["hotels"][0]["hotel_id"] == "hotel-1"

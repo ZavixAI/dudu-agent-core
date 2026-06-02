@@ -89,7 +89,7 @@ def test_estimate_tool_returns_unified_response(monkeypatch) -> None:
         "ok": True,
         "data": expected_data,
         "assistant_response_instruction": (
-            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+            constants.ASSISTANT_RESPONSE_INSTRUCTIONS["ride"]["estimate_price"]
         ),
     }
 
@@ -143,7 +143,7 @@ def test_estimate_tool_filters_selected_car_type(monkeypatch) -> None:
             "estimate_trace_id": "AGG_trace_1",
         },
         "assistant_response_instruction": (
-            constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+            constants.ASSISTANT_RESPONSE_INSTRUCTIONS["ride"]["estimate_price"]
         ),
     }
 

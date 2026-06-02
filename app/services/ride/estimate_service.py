@@ -183,7 +183,7 @@ async def estimate_ride_price(
     )
     response_payload = MCPToolResponse(data=filtered_data).model_dump()
     response_payload["assistant_response_instruction"] = (
-        constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
+        constants.ASSISTANT_RESPONSE_INSTRUCTIONS["ride"]["estimate_price"]
     )
     return response_payload
 

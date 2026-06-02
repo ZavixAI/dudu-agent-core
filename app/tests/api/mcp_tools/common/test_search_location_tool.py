@@ -104,7 +104,7 @@ def test_search_location_tool_returns_unified_response(monkeypatch) -> None:
             }
         ],
         "next_action_suggestions": (
-            constants.NEXT_ACTION_SUGGESTIONS_FOR_LOCATION_SEARCH
+            constants.NEXT_ACTION_SUGGESTIONS["location_search"]
         ),
     }
 
