@@ -8,14 +8,14 @@ from pydantic import Field
 from services.ride.estimate_service import estimate_ride_price
 
 
-def register_rideclaw_estimate_price_tools(mcp_app) -> None:
+def register_estimate_price_tools(mcp_app) -> None:
     """注册 RideClaw 打车价格预估 MCP 工具。"""
 
     @mcp_app.tool(
         name="ride_estimate_price",
         description="根据出发地和目的地预估打车报价。",
     )
-    async def rideclaw_estimate_price(
+    async def estimate_price(
         from_lng: Annotated[
             str,
             Field(description="出发地经度。"),
@@ -78,5 +78,5 @@ def register_rideclaw_estimate_price_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_estimate_price_tools",
+    "register_estimate_price_tools",
 ]

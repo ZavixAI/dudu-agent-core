@@ -16,7 +16,7 @@ from config import constants
 from core.http.exceptions import AppHTTPException
 from services.hotel import order_service
 
-MODULE_NAME = "api.mcp_tools.hotel.rideclaw_create_pending_payment_hotel_order_tools"
+MODULE_NAME = "api.mcp_tools.hotel.create_pending_payment_hotel_order_tools"
 
 
 class FakeMCPApp:
@@ -60,7 +60,7 @@ class FakeHTTPClient:
 def _get_create_pending_payment_hotel_order_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    module.register_rideclaw_create_pending_payment_hotel_order_tools(mcp_app)
+    module.register_create_pending_payment_hotel_order_tools(mcp_app)
     return mcp_app.tools["create_pending_payment_hotel_order"]["func"]
 
 

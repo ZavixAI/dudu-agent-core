@@ -6,17 +6,17 @@ from typing import Annotated, Union
 
 from pydantic import Field
 
-from services.hotel.room_service import filter_hotel_rooms
+from services.hotel.room_service import filter_hotel_rooms as filter_hotel_rooms_service
 
 
-def register_rideclaw_filter_hotel_rooms_tools(mcp_app) -> None:
+def register_filter_hotel_rooms_tools(mcp_app) -> None:
     """注册 RideClaw 酒店房型筛选 MCP 工具。"""
 
     @mcp_app.tool(
         name="filter_hotel_rooms",
         description="根据酒店供应商、酒店 ID 和入住日期查询可用房型及价格。",
     )
-    async def rideclaw_filter_hotel_rooms(
+    async def filter_hotel_rooms(
         hotel_type: Annotated[
             str,
             Field(description='供应商类型，从酒店搜索结果的 supplier 字段获取，例如 "meituan"。'),
@@ -72,7 +72,7 @@ def register_rideclaw_filter_hotel_rooms_tools(mcp_app) -> None:
     ) -> dict[str, object]:
         """查询指定酒店的可用房型及价格。"""
 
-        return await filter_hotel_rooms(
+        return await filter_hotel_rooms_service(
             hotel_type=hotel_type,
             hotel_id=hotel_id,
             check_in=check_in,
@@ -90,5 +90,5 @@ def register_rideclaw_filter_hotel_rooms_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_filter_hotel_rooms_tools",
+    "register_filter_hotel_rooms_tools",
 ]

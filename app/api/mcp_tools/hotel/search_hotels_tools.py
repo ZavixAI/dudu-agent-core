@@ -6,17 +6,17 @@ from typing import Annotated, Union
 
 from pydantic import Field
 
-from services.hotel.search_service import search_hotels
+from services.hotel.search_service import search_hotels as search_hotels_service
 
 
-def register_rideclaw_search_hotels_tools(mcp_app) -> None:
+def register_search_hotels_tools(mcp_app) -> None:
     """注册 RideClaw 酒店搜索 MCP 工具。"""
 
     @mcp_app.tool(
         name="hotel_search",
         description="根据目的地和入住日期搜索酒店，支持价格、星级、评分、距离、品牌和设施筛选。",
     )
-    async def rideclaw_search_hotels(
+    async def search_hotels(
         destination: Annotated[
             str,
             Field(description='目的地地址文本，例如 "北京市朝阳区三里屯"。'),
@@ -100,7 +100,7 @@ def register_rideclaw_search_hotels_tools(mcp_app) -> None:
     ) -> dict[str, object]:
         """搜索酒店并返回结构化聚合结果。"""
 
-        return await search_hotels(
+        return await search_hotels_service(
             destination=destination,
             check_in=check_in,
             check_out=check_out,
@@ -123,5 +123,5 @@ def register_rideclaw_search_hotels_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_search_hotels_tools",
+    "register_search_hotels_tools",
 ]

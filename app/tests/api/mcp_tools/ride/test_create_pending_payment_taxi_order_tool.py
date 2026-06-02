@@ -11,7 +11,7 @@ if str(APP_DIR) not in sys.path:
 
 from config import constants
 
-MODULE_NAME = "api.mcp_tools.ride.rideclaw_create_pending_payment_taxi_order_tools"
+MODULE_NAME = "api.mcp_tools.ride.create_pending_payment_taxi_order_tools"
 
 
 class FakeMCPApp:
@@ -34,7 +34,7 @@ class FakeMCPApp:
 def _get_create_pending_payment_taxi_order_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    module.register_rideclaw_create_pending_payment_taxi_order_tools(mcp_app)
+    module.register_create_pending_payment_taxi_order_tools(mcp_app)
     return mcp_app.tools["create_pending_payment_taxi_order"]["func"]
 
 

@@ -99,8 +99,8 @@ def test_search_train_options_tool_uses_train_mode(monkeypatch) -> None:
 
     result = asyncio.run(
         _get_tool(
-            "api.mcp_tools.transport.rideclaw_search_train_options_tools",
-            "register_rideclaw_search_train_options_tools",
+            "api.mcp_tools.transport.search_train_options_tools",
+            "register_search_train_options_tools",
             "search_train_options",
         )(
             date="2026-06-01",
@@ -125,8 +125,8 @@ def test_search_flight_options_tool_uses_flight_mode(monkeypatch) -> None:
 
     result = asyncio.run(
         _get_tool(
-            "api.mcp_tools.transport.rideclaw_search_flight_options_tools",
-            "register_rideclaw_search_flight_options_tools",
+            "api.mcp_tools.transport.search_flight_options_tools",
+            "register_search_flight_options_tools",
             "search_flight_options",
         )(
             date="2026-06-01",
@@ -154,8 +154,8 @@ def test_search_bus_options_tool_uses_bus_mode(monkeypatch) -> None:
 
     result = asyncio.run(
         _get_tool(
-            "api.mcp_tools.transport.rideclaw_search_bus_options_tools",
-            "register_rideclaw_search_bus_options_tools",
+            "api.mcp_tools.transport.search_bus_options_tools",
+            "register_search_bus_options_tools",
             "search_bus_options",
         )(
             date="2026-06-01",

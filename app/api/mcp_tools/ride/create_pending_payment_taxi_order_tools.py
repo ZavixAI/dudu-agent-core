@@ -7,7 +7,7 @@ from pydantic import Field
 from config import constants
 
 
-def register_rideclaw_create_pending_payment_taxi_order_tools(mcp_app) -> None:
+def register_create_pending_payment_taxi_order_tools(mcp_app) -> None:
     """注册 RideClaw 创建打车待支付订单 MCP 工具。"""
 
     @mcp_app.tool(
@@ -64,5 +64,5 @@ def register_rideclaw_create_pending_payment_taxi_order_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_create_pending_payment_taxi_order_tools",
+    "register_create_pending_payment_taxi_order_tools",
 ]

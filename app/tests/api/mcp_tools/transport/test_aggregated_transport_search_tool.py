@@ -16,7 +16,7 @@ from config import constants
 from core.http.exceptions import AppHTTPException
 from services.transport import search_service
 
-MODULE_NAME = "api.mcp_tools.transport.rideclaw_search_transport_options_tools"
+MODULE_NAME = "api.mcp_tools.transport.search_transport_options_tools"
 
 
 class FakeMCPApp:
@@ -60,7 +60,7 @@ class FakeHTTPClient:
 def _get_transport_search_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    module.register_rideclaw_search_transport_options_tools(mcp_app)
+    module.register_search_transport_options_tools(mcp_app)
     return mcp_app.tools["search_transport_options"]["func"]
 
 

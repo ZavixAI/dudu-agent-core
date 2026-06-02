@@ -72,8 +72,8 @@ def test_create_pending_payment_flight_order_tool_returns_snapshot(monkeypatch) 
 
     monkeypatch.setattr(order_service, "get_http_client", fake_get_http_client)
     tool = _get_tool(
-        "api.mcp_tools.transport.rideclaw_create_pending_payment_flight_order_tools",
-        "register_rideclaw_create_pending_payment_flight_order_tools",
+        "api.mcp_tools.transport.create_pending_payment_flight_order_tools",
+        "register_create_pending_payment_flight_order_tools",
         "create_pending_payment_flight_order",
     )
 
@@ -137,8 +137,8 @@ def test_create_pending_payment_train_order_tool_returns_normalized_snapshot(mon
 
     monkeypatch.setattr(order_service, "get_http_client", fake_get_http_client)
     tool = _get_tool(
-        "api.mcp_tools.transport.rideclaw_create_pending_payment_train_order_tools",
-        "register_rideclaw_create_pending_payment_train_order_tools",
+        "api.mcp_tools.transport.create_pending_payment_train_order_tools",
+        "register_create_pending_payment_train_order_tools",
         "create_pending_payment_train_order",
     )
 
@@ -216,8 +216,8 @@ def test_create_pending_payment_bus_order_tool_returns_normalized_snapshot(monke
 
     monkeypatch.setattr(order_service, "get_http_client", fake_get_http_client)
     tool = _get_tool(
-        "api.mcp_tools.transport.rideclaw_create_pending_payment_bus_order_tools",
-        "register_rideclaw_create_pending_payment_bus_order_tools",
+        "api.mcp_tools.transport.create_pending_payment_bus_order_tools",
+        "register_create_pending_payment_bus_order_tools",
         "create_pending_payment_bus_order",
     )
 
@@ -261,8 +261,8 @@ def test_create_pending_payment_transport_order_raises_for_snapshot_error(monkey
 
     monkeypatch.setattr(order_service, "get_http_client", fake_get_http_client)
     tool = _get_tool(
-        "api.mcp_tools.transport.rideclaw_create_pending_payment_bus_order_tools",
-        "register_rideclaw_create_pending_payment_bus_order_tools",
+        "api.mcp_tools.transport.create_pending_payment_bus_order_tools",
+        "register_create_pending_payment_bus_order_tools",
         "create_pending_payment_bus_order",
     )
 
@@ -315,8 +315,8 @@ def test_create_pending_payment_transport_order_raises_for_snapshot_error(monkey
 )
 def test_create_pending_payment_flight_order_validates_required_fields(kwargs, error_code) -> None:
     tool = _get_tool(
-        "api.mcp_tools.transport.rideclaw_create_pending_payment_flight_order_tools",
-        "register_rideclaw_create_pending_payment_flight_order_tools",
+        "api.mcp_tools.transport.create_pending_payment_flight_order_tools",
+        "register_create_pending_payment_flight_order_tools",
         "create_pending_payment_flight_order",
     )
 

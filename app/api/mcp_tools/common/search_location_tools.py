@@ -5,17 +5,17 @@ from __future__ import annotations
 from typing import Annotated, Any
 
 from pydantic import Field
-from services.common.location_service import search_location
+from services.common.location_service import search_location as search_location_service
 
 
-def register_rideclaw_search_location_tools(mcp_app) -> None:
+def register_search_location_tools(mcp_app) -> None:
     """注册 RideClaw 位置搜索 MCP 工具。"""
 
     @mcp_app.tool(
         name="location_search",
         description="根据关键词、地区和半径搜索候选地点。",
     )
-    async def rideclaw_search_location(
+    async def search_location(
         query: Annotated[
             str,
             Field(description="要搜索的地点名称、地址或关键词。"),
@@ -31,7 +31,7 @@ def register_rideclaw_search_location_tools(mcp_app) -> None:
     ) -> dict[str, Any]:
         """为打车、酒店或行程场景搜索候选地点。"""
 
-        return await search_location(
+        return await search_location_service(
             query=query,
             region=region,
             radius=radius,
@@ -39,5 +39,5 @@ def register_rideclaw_search_location_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_search_location_tools",
+    "register_search_location_tools",
 ]

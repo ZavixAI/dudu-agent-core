@@ -16,7 +16,7 @@ from config import constants
 from core.http.exceptions import AppHTTPException
 from services.ride import estimate_service
 
-MODULE_NAME = "api.mcp_tools.ride.rideclaw_estimate_price_tools"
+MODULE_NAME = "api.mcp_tools.ride.estimate_price_tools"
 
 
 class FakeMCPApp:
@@ -58,7 +58,7 @@ class FakeHTTPClient:
 def _get_estimate_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    module.register_rideclaw_estimate_price_tools(mcp_app)
+    module.register_estimate_price_tools(mcp_app)
     return mcp_app.tools["ride_estimate_price"]["func"]
 
 
@@ -145,6 +145,39 @@ def test_estimate_tool_filters_selected_car_type(monkeypatch) -> None:
         "assistant_response_instruction": (
             constants.ASSISTANT_RESPONSE_INSTRUCTION_FOR_ESTIMATE_PRICE
         ),
+    }
+
+
+def test_estimate_tool_returns_unsupported_route_message(monkeypatch) -> None:
+    async def fake_get_http_client(service_name: str) -> FakeHTTPClient:
+        assert service_name == "rideclaw"
+        return FakeHTTPClient(
+            {
+                "code": -1,
+                "message": "行程超过 150 公里，暂不支持预估",
+                "data": None,
+            }
+        )
+
+    monkeypatch.setattr(estimate_service, "get_http_client", fake_get_http_client)
+
+    result = asyncio.run(
+        _get_estimate_tool()(
+            from_lng="116.407526",
+            from_lat="39.904030",
+            from_name="北京",
+            to_lng="114.057868",
+            to_lat="22.543099",
+            to_name="深圳",
+        )
+    )
+
+    assert result == {
+        "ok": True,
+        "data": {
+            "reason": "行程超过 150 公里，暂不支持预估",
+            "available": False,
+        },
     }
 
 

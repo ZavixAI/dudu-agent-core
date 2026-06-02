@@ -16,7 +16,7 @@ from config import constants
 from core.http.exceptions import AppHTTPException
 from services.common import location_service
 
-MODULE_NAME = "api.mcp_tools.common.rideclaw_search_location_tools"
+MODULE_NAME = "api.mcp_tools.common.search_location_tools"
 
 
 class FakeMCPApp:
@@ -58,7 +58,7 @@ class FakeHTTPClient:
 def _get_search_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    module.register_rideclaw_search_location_tools(mcp_app)
+    module.register_search_location_tools(mcp_app)
     return mcp_app.tools["location_search"]["func"]
 
 

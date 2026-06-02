@@ -16,7 +16,7 @@ from config import constants
 from core.http.exceptions import AppHTTPException
 from services.hotel import room_service
 
-MODULE_NAME = "api.mcp_tools.hotel.rideclaw_filter_hotel_rooms_tools"
+MODULE_NAME = "api.mcp_tools.hotel.filter_hotel_rooms_tools"
 
 
 class FakeMCPApp:
@@ -60,7 +60,7 @@ class FakeHTTPClient:
 def _get_filter_rooms_tool():
     module = importlib.import_module(MODULE_NAME)
     mcp_app = FakeMCPApp()
-    module.register_rideclaw_filter_hotel_rooms_tools(mcp_app)
+    module.register_filter_hotel_rooms_tools(mcp_app)
     return mcp_app.tools["filter_hotel_rooms"]["func"]
 
 

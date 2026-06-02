@@ -135,6 +135,14 @@ async def estimate_ride_price(
     payload = response.json()
     raw_response = RawRideEstimateResponse(**payload)
     if raw_response.code != 0:
+        if raw_response.code == -1 and "暂不支持预估" in raw_response.message:
+            return MCPToolResponse(
+                data={
+                    "reason": raw_response.message,
+                    "available": False,
+                }
+            ).model_dump()
+
         logger.warning(
             "RideClaw quote returned error from_name={} to_name={} order_type={} code={} message={}",
             from_name,

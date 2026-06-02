@@ -9,14 +9,14 @@ from pydantic import Field
 from services.transport.search_service import search_aggregated_transport
 
 
-def register_rideclaw_search_transport_options_tools(mcp_app) -> None:
+def register_search_transport_options_tools(mcp_app) -> None:
     """注册 RideClaw 交通方案搜索 MCP 工具。"""
 
     @mcp_app.tool(
         name="search_transport_options",
         description="搜索城市间交通方案，返回可选的航班、火车和巴士结果。",
     )
-    async def rideclaw_search_transport_options(
+    async def search_transport_options(
         date: Annotated[
             str,
             Field(description='出发日期，格式为 "YYYY-MM-DD"。'),
@@ -65,5 +65,5 @@ def register_rideclaw_search_transport_options_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_search_transport_options_tools",
+    "register_search_transport_options_tools",
 ]

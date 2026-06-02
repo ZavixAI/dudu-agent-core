@@ -9,7 +9,7 @@ from pydantic import Field
 from services.hotel.order_service import create_pending_payment_hotel_order
 
 
-def register_rideclaw_create_pending_payment_hotel_order_tools(mcp_app) -> None:
+def register_create_pending_payment_hotel_order_tools(mcp_app) -> None:
     """注册 RideClaw 创建酒店待支付订单 MCP 工具。"""
 
     @mcp_app.tool(
@@ -45,5 +45,5 @@ def register_rideclaw_create_pending_payment_hotel_order_tools(mcp_app) -> None:
 
 
 __all__ = [
-    "register_rideclaw_create_pending_payment_hotel_order_tools",
+    "register_create_pending_payment_hotel_order_tools",
 ]
