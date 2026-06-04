@@ -49,6 +49,14 @@ def register_search_transport_options_tools(mcp_app) -> None:
             Literal["flight", "train", "bus", "all"],
             Field(description="交通方式，可选 flight、train、bus、all；默认 all。"),
         ] = "all",
+        page: Annotated[
+            int,
+            Field(description="单一交通方式查询时的页码，从 1 开始；all 模式不分页。"),
+        ] = 1,
+        page_size: Annotated[
+            int,
+            Field(description="单一交通方式查询时的每页数量，默认 10，最大 20；all 模式不分页。"),
+        ] = 10,
     ) -> dict[str, object]:
         """搜索交通方案并返回结构化结果。"""
 
@@ -61,6 +69,8 @@ def register_search_transport_options_tools(mcp_app) -> None:
             latest_arrival_time=latest_arrival_time,
             user_token=user_token,
             modes=None if modes == "all" else [modes],
+            page=page,
+            page_size=page_size,
         )
 
 

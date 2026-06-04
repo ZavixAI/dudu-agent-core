@@ -114,12 +114,16 @@ def test_aggregated_transport_search_tool_returns_unified_response(monkeypatch) 
                                     "flightNumber": "CZ1234",
                                     "aircraft": "320",
                                     "depCityName": "深圳",
+                                    "depCityCode": "SZX",
                                     "depAirportName": "宝安机场",
+                                    "depAirportCode": "SZX",
                                     "depTerminal": "T3",
                                     "depDate": "2026-06-01",
                                     "depTime": "09:00",
                                     "arrCityName": "广州",
+                                    "arrCityCode": "CAN",
                                     "arrAirportName": "白云机场",
+                                    "arrAirportCode": "CAN",
                                     "arrTerminal": "T2",
                                     "arrDate": "2026-06-01",
                                     "arrTime": "10:00",
@@ -224,8 +228,6 @@ def test_aggregated_transport_search_tool_returns_unified_response(monkeypatch) 
                     "flightId": "flight-1",
                     "trips": [
                         {
-                            "depAirportCode": "SZX",
-                            "arrAirportCode": "CAN",
                             "segments": [
                                 {
                                     "airlineName": "南方航空",
@@ -248,23 +250,9 @@ def test_aggregated_transport_search_tool_returns_unified_response(monkeypatch) 
                             ],
                         }
                     ],
-                    "cabinFares": [
-                        {
-                            "cabinFareId": "fare-1",
-                            "cabin": "Y",
-                            "cabinName": "经济舱",
-                            "bookingClass": "Y",
-                            "seat": "A",
-                            "passengerFares": [
-                                {
-                                    "passengerType": "ADT",
-                                    "total": 500,
-                                    "baseFare": 420,
-                                    "airportTax": 50,
-                                    "oilTax": 30,
-                                }
-                            ],
-                        }
+                    "fare_summary": [
+                        "cabin_fare_id=fare-1, 舱位=经济舱(Y) 订座级别=Y 余座=A | "
+                        "ADT: 总价¥500 (票面¥420+机建¥50+燃油¥30)"
                     ],
                 }
             ],
@@ -288,14 +276,13 @@ def test_aggregated_transport_search_tool_returns_unified_response(monkeypatch) 
                             "price": "80.00",
                             "discount_price": "70.00",
                             "avail_seat_count": 20,
-                            "duration": 90,
-                            "distance": 120,
                         }
                     ],
                 }
-                for i in range(5)
+                for i in range(6)
             ]
         },
+        "hints": [search_service.ALL_MODE_HINT],
     }
     fake_client = FakeHTTPClient(
         [
@@ -400,9 +387,69 @@ def test_aggregated_transport_search_tool_accepts_single_mode_enum(monkeypatch) 
 
     assert result == {
         "ok": True,
-        "data": {"train_data": {"trains": []}},
+        "data": {
+            "train_data": {"trains": []},
+            "pagination": {
+                "mode": "train",
+                "page": 1,
+                "page_size": 10,
+                "total": 0,
+                "returned": 0,
+                "has_more": False,
+            },
+        },
     }
     assert fake_client.posts[2]["json"]["modes"] == ["train"]
+
+
+def test_aggregated_transport_search_tool_paginates_single_mode(monkeypatch) -> None:
+    trains = [
+        {
+            "trainCode": f"G{i}",
+            "trainNo": f"train-no-{i}",
+            "fromStation": "北京南",
+            "toStation": "上海",
+            "fromDateTime": f"2026-06-01 0{i}:00",
+            "toDateTime": f"2026-06-01 1{i}:00",
+            "Seats": [],
+        }
+        for i in range(1, 6)
+    ]
+    fake_client = FakeHTTPClient(
+        [
+            {"code": 0, "message": "success", "data": {"lng": 1, "lat": 2}},
+            {"code": 0, "message": "success", "data": {"lng": 3, "lat": 4}},
+            {"code": 0, "message": "success", "data": {"train_data": {"trains": trains}}},
+        ]
+    )
+
+    async def fake_get_http_client(service_name: str) -> FakeHTTPClient:
+        assert service_name == "rideclaw"
+        return fake_client
+
+    monkeypatch.setattr(search_service, "get_http_client", fake_get_http_client)
+
+    result = asyncio.run(
+        _get_transport_search_tool()(
+            date="2026-06-01",
+            from_name="北京",
+            to_name="上海",
+            is_cn=True,
+            modes="train",
+            page=2,
+            page_size=2,
+        )
+    )
+
+    assert [train["trainCode"] for train in result["data"]["train_data"]["trains"]] == ["G3", "G4"]
+    assert result["data"]["pagination"] == {
+        "mode": "train",
+        "page": 2,
+        "page_size": 2,
+        "total": 5,
+        "returned": 2,
+        "has_more": True,
+    }
 
 
 @pytest.mark.parametrize(

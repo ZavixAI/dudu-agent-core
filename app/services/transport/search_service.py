@@ -20,6 +20,13 @@ from schema.transport import (
 
 DEFAULT_TRANSPORT_MODES = ["flight", "train", "bus"]
 VALID_TRANSPORT_MODES = set(DEFAULT_TRANSPORT_MODES)
+DEFAULT_PAGE = 1
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 20
+ALL_MODE_HINT = (
+    "all 模式返回聚合概览，不支持分页；如需查看更多某类交通结果，"
+    "请使用 modes='flight'、modes='train' 或 modes='bus' 单独查询。"
+)
 
 
 def _auth_headers(user_token: str | None) -> dict[str, str] | None:
@@ -82,6 +89,42 @@ def _normalize_modes(modes: str | list[str] | None) -> list[str]:
     return normalized
 
 
+def _normalize_page(value: int | str | None) -> int:
+    try:
+        page = int(value) if value is not None else DEFAULT_PAGE
+    except (TypeError, ValueError):
+        return DEFAULT_PAGE
+    return max(page, 1)
+
+
+def _normalize_page_size(value: int | str | None) -> int:
+    try:
+        page_size = int(value) if value is not None else DEFAULT_PAGE_SIZE
+    except (TypeError, ValueError):
+        return DEFAULT_PAGE_SIZE
+    if page_size < 1:
+        return DEFAULT_PAGE_SIZE
+    return min(page_size, MAX_PAGE_SIZE)
+
+
+def _paginate_items(
+    items: list[Any],
+    page: int,
+    page_size: int,
+) -> tuple[list[Any], dict[str, Any]]:
+    total = len(items)
+    start = (page - 1) * page_size
+    end = start + page_size
+    paged_items = items[start:end]
+    return paged_items, {
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+        "returned": len(paged_items),
+        "has_more": end < total,
+    }
+
+
 def _adjust_latest_arrival_time(latest_arrival_time: str | None) -> str | None:
     if not latest_arrival_time:
         return None
@@ -98,8 +141,15 @@ def _pick_fields(source: dict[str, Any], fields: list[str]) -> dict[str, Any]:
     return {field: source.get(field) for field in fields if field in source}
 
 
-def _filter_train_data(train_data: dict[str, Any]) -> dict[str, Any]:
+def _filter_train_data(
+    train_data: dict[str, Any],
+    page: int | None = None,
+    page_size: int | None = None,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
     trains = train_data.get("trains") or []
+    page_meta = None
+    if page is not None and page_size is not None:
+        trains, page_meta = _paginate_items(trains, page, page_size)
     filtered_trains = []
     for train in trains:
         if not isinstance(train, dict):
@@ -126,13 +176,21 @@ def _filter_train_data(train_data: dict[str, Any]) -> dict[str, Any]:
                 if isinstance(seat, dict)
             ]
         filtered_trains.append(filtered_train)
-    return {"trains": filtered_trains}
+    return {"trains": filtered_trains}, page_meta
 
 
-def _filter_flight_data(flight_data: dict[str, Any]) -> dict[str, Any]:
+def _filter_flight_data(
+    flight_data: dict[str, Any],
+    page: int | None = None,
+    page_size: int | None = None,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
     filtered_data = _pick_fields(flight_data, ["search_token"])
+    flights = flight_data.get("flights") or []
+    page_meta = None
+    if page is not None and page_size is not None:
+        flights, page_meta = _paginate_items(flights, page, page_size)
     filtered_flights = []
-    for flight in flight_data.get("flights") or []:
+    for flight in flights:
         if not isinstance(flight, dict):
             continue
         filtered_flight = _pick_fields(flight, ["flightId"])
@@ -140,7 +198,7 @@ def _filter_flight_data(flight_data: dict[str, Any]) -> dict[str, Any]:
         for trip in flight.get("trips") or []:
             if not isinstance(trip, dict):
                 continue
-            filtered_trip = _pick_fields(trip, ["depAirportCode", "arrAirportCode"])
+            filtered_trip: dict[str, Any] = {}
             filtered_segments = []
             for segment in trip.get("segments") or []:
                 if not isinstance(segment, dict):
@@ -153,16 +211,12 @@ def _filter_flight_data(flight_data: dict[str, Any]) -> dict[str, Any]:
                         "flightNumber",
                         "aircraft",
                         "depCityName",
-                        "depCityCode",
                         "depAirportName",
-                        "depAirportCode",
                         "depTerminal",
                         "depDate",
                         "depTime",
                         "arrCityName",
-                        "arrCityCode",
                         "arrAirportName",
-                        "arrAirportCode",
                         "arrTerminal",
                         "arrDate",
                         "arrTime",
@@ -182,34 +236,54 @@ def _filter_flight_data(flight_data: dict[str, Any]) -> dict[str, Any]:
             filtered_trips.append(filtered_trip)
         filtered_flight["trips"] = filtered_trips
 
-        cabin_fares = []
+        fare_summaries = []
         for fare in flight.get("cabinFares") or []:
             if not isinstance(fare, dict):
                 continue
-            filtered_fare = _pick_fields(
-                fare,
-                ["cabinFareId", "cabin", "cabinName", "bookingClass", "seat"],
-            )
-            passenger_fares = fare.get("passengerFares") or []
-            if passenger_fares:
-                filtered_fare["passengerFares"] = [
-                    _pick_fields(
-                        passenger_fare,
-                        ["passengerType", "total", "baseFare", "airportTax", "oilTax"],
-                    )
-                    for passenger_fare in passenger_fares
-                    if isinstance(passenger_fare, dict)
-                ]
-            cabin_fares.append(filtered_fare)
-        filtered_flight["cabinFares"] = cabin_fares
+            cabin_fare_id = fare.get("cabinFareId", "")
+            cabin_name = fare.get("cabinName", "")
+            cabin = fare.get("cabin", "")
+            booking_class = fare.get("bookingClass", "")
+            seat = fare.get("seat", "")
+            fare_line = f"cabin_fare_id={cabin_fare_id}, 舱位={cabin_name}({cabin})"
+            if booking_class:
+                fare_line += f" 订座级别={booking_class}"
+            if seat:
+                fare_line += f" 余座={seat}"
+
+            passenger_fare_parts = []
+            for passenger_fare in fare.get("passengerFares") or []:
+                if not isinstance(passenger_fare, dict):
+                    continue
+                passenger_type = passenger_fare.get("passengerType", "")
+                total = passenger_fare.get("total", 0)
+                base_fare = passenger_fare.get("baseFare", 0)
+                airport_tax = passenger_fare.get("airportTax", 0)
+                oil_tax = passenger_fare.get("oilTax", 0)
+                passenger_fare_parts.append(
+                    f"{passenger_type}: 总价¥{total} (票面¥{base_fare}+机建¥{airport_tax}+燃油¥{oil_tax})"
+                )
+            if passenger_fare_parts:
+                fare_line += " | " + "; ".join(passenger_fare_parts)
+            fare_summaries.append(fare_line)
+        if fare_summaries:
+            filtered_flight["fare_summary"] = fare_summaries
         filtered_flights.append(filtered_flight)
     filtered_data["flights"] = filtered_flights
-    return filtered_data
+    return filtered_data, page_meta
 
 
-def _filter_bus_data(bus_data: dict[str, Any]) -> dict[str, Any]:
+def _filter_bus_data(
+    bus_data: dict[str, Any],
+    page: int | None = None,
+    page_size: int | None = None,
+) -> tuple[dict[str, Any], dict[str, Any] | None]:
+    buses = bus_data.get("buses") or []
+    page_meta = None
+    if page is not None and page_size is not None:
+        buses, page_meta = _paginate_items(buses, page, page_size)
     filtered_buses = []
-    for bus in (bus_data.get("buses") or [])[:5]:
+    for bus in buses:
         if not isinstance(bus, dict):
             continue
         filtered_bus = _pick_fields(
@@ -237,15 +311,13 @@ def _filter_bus_data(bus_data: dict[str, Any]) -> dict[str, Any]:
                         "price",
                         "discount_price",
                         "avail_seat_count",
-                        "duration",
-                        "distance",
                     ],
                 )
                 for schedule in class_day_list
                 if isinstance(schedule, dict)
             ]
         filtered_buses.append(filtered_bus)
-    return {"buses": filtered_buses}
+    return {"buses": filtered_buses}, page_meta
 
 
 def _filter_errors(errors: Any) -> list[dict[str, Any]]:
@@ -258,24 +330,53 @@ def _filter_errors(errors: Any) -> list[dict[str, Any]]:
     ]
 
 
-def _filter_aggregated_transport_data(data: Any) -> Any:
+def _filter_aggregated_transport_data(
+    data: Any,
+    requested_modes: list[str] | None = None,
+    page: int | None = None,
+    page_size: int | None = None,
+) -> Any:
     if not isinstance(data, dict):
         return data
 
     filtered_data = _pick_fields(data, ["from_city", "to_city", "date", "search_id"])
+    requested_modes = requested_modes or list(DEFAULT_TRANSPORT_MODES)
+    should_paginate = len(requested_modes) == 1
+    normalized_page = _normalize_page(page)
+    normalized_page_size = _normalize_page_size(page_size)
     errors = _filter_errors(data.get("errors"))
     if errors:
         filtered_data["errors"] = errors
 
     train_data = data.get("train_data")
-    if isinstance(train_data, dict):
-        filtered_data["train_data"] = _filter_train_data(train_data)
+    if "train" in requested_modes and isinstance(train_data, dict):
+        filtered_data["train_data"], train_page_meta = _filter_train_data(
+            train_data,
+            normalized_page if should_paginate else None,
+            normalized_page_size if should_paginate else None,
+        )
+        if train_page_meta is not None:
+            filtered_data["pagination"] = {"mode": "train", **train_page_meta}
     flight_data = data.get("flight_data")
-    if isinstance(flight_data, dict):
-        filtered_data["flight_data"] = _filter_flight_data(flight_data)
+    if "flight" in requested_modes and isinstance(flight_data, dict):
+        filtered_data["flight_data"], flight_page_meta = _filter_flight_data(
+            flight_data,
+            normalized_page if should_paginate else None,
+            normalized_page_size if should_paginate else None,
+        )
+        if flight_page_meta is not None:
+            filtered_data["pagination"] = {"mode": "flight", **flight_page_meta}
     bus_data = data.get("bus_data")
-    if isinstance(bus_data, dict):
-        filtered_data["bus_data"] = _filter_bus_data(bus_data)
+    if "bus" in requested_modes and isinstance(bus_data, dict):
+        filtered_data["bus_data"], bus_page_meta = _filter_bus_data(
+            bus_data,
+            normalized_page if should_paginate else None,
+            normalized_page_size if should_paginate else None,
+        )
+        if bus_page_meta is not None:
+            filtered_data["pagination"] = {"mode": "bus", **bus_page_meta}
+    if not should_paginate:
+        filtered_data["hints"] = [ALL_MODE_HINT]
     return filtered_data
 
 
@@ -346,6 +447,8 @@ async def search_aggregated_transport(
     latest_arrival_time: str | None = None,
     user_token: str | None = None,
     modes: str | list[str] | None = None,
+    page: int | str | None = None,
+    page_size: int | str | None = None,
 ) -> dict[str, Any]:
     """Search aggregated transport options through RideClaw."""
 
@@ -426,7 +529,12 @@ async def search_aggregated_transport(
         to_name,
     )
     return MCPToolResponse(
-        data=_filter_aggregated_transport_data(raw_response.data)
+        data=_filter_aggregated_transport_data(
+            raw_response.data,
+            requested_modes=request_body["modes"],
+            page=_normalize_page(page),
+            page_size=_normalize_page_size(page_size),
+        )
     ).model_dump()
 
 

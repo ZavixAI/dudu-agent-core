@@ -72,7 +72,7 @@ def _transport_payload() -> dict[str, Any]:
         "train_data": {"trains": [{"trainCode": "G1"}]},
         "flight_data": {
             "search_token": "token-1",
-            "flights": [{"flightId": "flight-1", "trips": [], "cabinFares": []}],
+            "flights": [{"flightId": "flight-1", "trips": []}],
         },
         "bus_data": {"buses": [{"line_name": "bus-1"}]},
     }
@@ -112,6 +112,14 @@ def test_search_train_options_tool_uses_train_mode(monkeypatch) -> None:
 
     assert fake_client.posts[2]["json"]["modes"] == ["train"]
     assert result["data"]["train_data"] == {"trains": [{"trainCode": "G1"}]}
+    assert result["data"]["pagination"] == {
+        "mode": "train",
+        "page": 1,
+        "page_size": 10,
+        "total": 1,
+        "returned": 1,
+        "has_more": False,
+    }
 
 
 def test_search_flight_options_tool_uses_flight_mode(monkeypatch) -> None:
@@ -139,7 +147,15 @@ def test_search_flight_options_tool_uses_flight_mode(monkeypatch) -> None:
     assert fake_client.posts[2]["json"]["modes"] == ["flight"]
     assert result["data"]["flight_data"] == {
         "search_token": "token-1",
-        "flights": [{"flightId": "flight-1", "trips": [], "cabinFares": []}],
+        "flights": [{"flightId": "flight-1", "trips": []}],
+    }
+    assert result["data"]["pagination"] == {
+        "mode": "flight",
+        "page": 1,
+        "page_size": 10,
+        "total": 1,
+        "returned": 1,
+        "has_more": False,
     }
 
 
@@ -167,3 +183,11 @@ def test_search_bus_options_tool_uses_bus_mode(monkeypatch) -> None:
 
     assert fake_client.posts[2]["json"]["modes"] == ["bus"]
     assert result["data"]["bus_data"] == {"buses": [{"line_name": "bus-1"}]}
+    assert result["data"]["pagination"] == {
+        "mode": "bus",
+        "page": 1,
+        "page_size": 10,
+        "total": 1,
+        "returned": 1,
+        "has_more": False,
+    }

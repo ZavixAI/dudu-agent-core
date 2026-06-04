@@ -33,6 +33,14 @@ def register_search_flight_options_tools(mcp_app) -> None:
             str | None,
             Field(description="用户登录令牌；没有登录态时可为空。"),
         ] = None,
+        page: Annotated[
+            int,
+            Field(description="页码，从 1 开始；默认 1。"),
+        ] = 1,
+        page_size: Annotated[
+            int,
+            Field(description="每页数量，默认 10，最大 20。"),
+        ] = 10,
     ) -> dict[str, object]:
         """搜索航班方案。"""
 
@@ -45,6 +53,8 @@ def register_search_flight_options_tools(mcp_app) -> None:
             latest_arrival_time=latest_arrival_time,
             user_token=user_token,
             modes=["flight"],
+            page=page,
+            page_size=page_size,
         )
 
 
