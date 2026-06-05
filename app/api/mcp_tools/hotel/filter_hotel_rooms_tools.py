@@ -14,7 +14,11 @@ def register_filter_hotel_rooms_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="filter_hotel_rooms",
-        description="根据酒店供应商、酒店 ID 和入住日期查询可用房型及价格。",
+        description=(
+            "功能：根据酒店供应商、酒店 ID 和入住日期查询指定酒店的可用房型及价格。"
+            "使用场景：适用于已从酒店搜索结果中定位到某家酒店后，继续查看可订房型、房价、"
+            "全日房或钟点房等详情。"
+        ),
     )
     async def filter_hotel_rooms(
         hotel_type: Annotated[

@@ -12,7 +12,11 @@ def register_create_pending_payment_taxi_order_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="create_pending_payment_taxi_order",
-        description="根据用户选择的报价方案生成打车待支付订单数据。",
+        description=(
+            "功能：根据用户选择的打车报价方案生成打车待支付订单数据。"
+            "使用场景：适用于已从价格预估结果中确认车型和报价后的下单环节，"
+            "用于创建待支付打车订单。"
+        ),
     )
     async def create_pending_payment_taxi_order(
         estimate_trace_id: Annotated[

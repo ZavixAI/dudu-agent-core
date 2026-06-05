@@ -14,7 +14,11 @@ def register_search_bus_options_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="search_bus_options",
-        description="搜索城市间巴士方案，返回可选线路和班次。",
+        description=(
+            "功能：搜索城市间巴士方案，返回可选线路、班次和票价信息。"
+            "使用场景：适用于巴士、客车或汽车票出行方案查询，"
+            "并按出发到达城市、日期、时间范围筛选班次。"
+        ),
     )
     async def search_bus_options(
         date: Annotated[str, Field(description='出发日期，格式为 "YYYY-MM-DD"。')],

@@ -14,7 +14,11 @@ def register_search_hotels_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="hotel_search",
-        description="根据目的地和入住日期搜索酒店，支持价格、星级、评分、距离、品牌和设施筛选。",
+        description=(
+            "功能：根据目的地和入住日期搜索酒店，支持价格、星级、评分、距离、品牌和设施筛选。"
+            "使用场景：适用于酒店查找、酒店列表比较，或按预算、星级、评分、距离、品牌、"
+            "设施等条件筛选住宿方案。"
+        ),
     )
     async def search_hotels(
         destination: Annotated[

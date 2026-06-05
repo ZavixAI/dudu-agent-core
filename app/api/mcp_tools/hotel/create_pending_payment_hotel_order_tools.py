@@ -14,7 +14,11 @@ def register_create_pending_payment_hotel_order_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="create_pending_payment_hotel_order",
-        description="根据酒店搜索快照定位字段生成用户酒店待支付订单数据。",
+        description=(
+            "功能：根据酒店搜索快照定位字段生成用户酒店待支付订单数据。"
+            "使用场景：适用于已确认酒店、房型产品和入住信息后的支付前环节，"
+            "用于创建待支付酒店订单。"
+        ),
     )
     async def create_pending_payment_hotel_order_tool(
         search_id: Annotated[

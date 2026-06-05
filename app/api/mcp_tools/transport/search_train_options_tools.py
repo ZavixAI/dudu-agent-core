@@ -14,7 +14,11 @@ def register_search_train_options_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="search_train_options",
-        description="搜索城市间火车方案，返回可选车次和席别余票。",
+        description=(
+            "功能：搜索城市间火车方案，返回可选车次、席别、余票和价格信息。"
+            "使用场景：适用于火车、高铁、动车或铁路出行方案查询，"
+            "并按出发到达站点、日期、时间范围筛选车次。"
+        ),
     )
     async def search_train_options(
         date: Annotated[str, Field(description='出发日期，格式为 "YYYY-MM-DD"。')],

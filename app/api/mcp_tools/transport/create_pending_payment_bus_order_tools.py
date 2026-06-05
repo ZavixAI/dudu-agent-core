@@ -14,7 +14,11 @@ def register_create_pending_payment_bus_order_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="create_pending_payment_bus_order",
-        description="根据聚合交通搜索快照定位字段生成巴士待支付订单数据。",
+        description=(
+            "功能：根据聚合交通搜索快照定位字段生成巴士待支付订单数据。"
+            "使用场景：适用于已确认具体巴士班次后的支付前环节，"
+            "用于创建待支付巴士订单。"
+        ),
     )
     async def create_pending_payment_bus_order_tool(
         search_id: Annotated[

@@ -14,7 +14,11 @@ def register_search_transport_options_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="search_transport_options",
-        description="搜索城市间交通方案，返回可选的航班、火车和巴士结果。",
+        description=(
+            "功能：搜索城市间综合交通方案，返回可选的航班、火车和巴士结果。"
+            "使用场景：适用于城市间出行方案规划中尚未限定交通方式，"
+            "或需要同时比较航班、火车、巴士方案的场景。"
+        ),
     )
     async def search_transport_options(
         date: Annotated[

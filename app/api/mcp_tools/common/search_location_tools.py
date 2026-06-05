@@ -13,7 +13,11 @@ def register_search_location_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="location_search",
-        description="根据关键词、地区和半径搜索候选地点。",
+        description=(
+            "功能：根据关键词、地区和半径搜索候选地点。"
+            "使用场景：适用于地点名称、地址或关键词需要解析为可选地点，"
+            "以及打车、酒店、交通查询等流程需要明确地点时。"
+        ),
     )
     async def search_location(
         query: Annotated[

@@ -13,7 +13,11 @@ def register_estimate_price_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="ride_estimate_price",
-        description="根据出发地和目的地预估打车报价。",
+        description=(
+            "功能：根据出发地、目的地、用车时间和车型档位预估打车报价。"
+            "使用场景：适用于实时叫车或预约用车流程中的报价评估，"
+            "用于获取不同车型的价格、距离、时长等报价信息。"
+        ),
     )
     async def estimate_price(
         from_lng: Annotated[

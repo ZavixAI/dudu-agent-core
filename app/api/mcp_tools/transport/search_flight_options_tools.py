@@ -14,7 +14,11 @@ def register_search_flight_options_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="search_flight_options",
-        description="搜索城市间航班方案，返回可选航班、航段和舱位价格。",
+        description=(
+            "功能：搜索城市间航班方案，返回可选航班、航段和舱位价格。"
+            "使用场景：适用于机票、航班或飞机出行方案查询，"
+            "并按出发到达城市、日期、时间范围筛选航班。"
+        ),
     )
     async def search_flight_options(
         date: Annotated[str, Field(description='出发日期，格式为 "YYYY-MM-DD"。')],

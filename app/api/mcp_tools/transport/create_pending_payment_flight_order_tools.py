@@ -14,7 +14,11 @@ def register_create_pending_payment_flight_order_tools(mcp_app) -> None:
 
     @mcp_app.tool(
         name="create_pending_payment_flight_order",
-        description="根据航班搜索快照定位字段生成机票待支付订单数据。",
+        description=(
+            "功能：根据航班搜索快照定位字段生成机票待支付订单数据。"
+            "使用场景：适用于已确认具体航班和舱位票价后的支付前环节，"
+            "用于创建待支付机票订单。"
+        ),
     )
     async def create_pending_payment_flight_order_tool(
         search_token: Annotated[
