@@ -33,6 +33,7 @@ description: 酒店预订：搜索酒店与房型，按用户过往偏好推荐�
 ### 搜索与推荐
 
 - `hotel_search` 后：不重复罗列列表；按过往偏好选性价比最合适的一家，进入 `filter_hotel_rooms`。
+- `hotel_search` 在查找指定酒店时最多查询前 3 页/次；如果没有指定酒店的明显匹配，应提示未找到该酒店，并推荐附近可订酒店或询问是否更换条件。
 - `filter_hotel_rooms` 后：不重复罗列房型；选最合适可订产品，进入 `create_pending_payment_hotel_order`。
 - 用户明确点选某酒店/房型：视为确认下单，非修改搜索条件。
 - 工具若返回 `next_action_suggestions` / `assistant_response_instruction` 可参考，否则按本技能推进。
